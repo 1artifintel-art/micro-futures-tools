@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Position Size Calculator — AMarkets MT4</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; padding: 20px; }
+.container { max-width: 680px; margin: 0 auto; }
+h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; color: #e6edf3; }
+.subtitle { font-size: 13px; color: #7d8590; margin-bottom: 24px; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.sec { font-size: 11px; font-weight: 500; color: #7d8590; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: #7d8590; }
+.field input, .field select { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-size: 14px; padding: 8px 10px; width: 100%; transition: border-color .15s; }
+.field input:focus, .field select:focus { outline: none; border-color: #388bfd; }
+.field select option { background: #161b22; }
+.spec-info { font-size: 12px; color: #7d8590; padding: 6px 0; line-height: 1.7; }
+.metric { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 12px 14px; }
+.metric .lb { font-size: 11px; color: #7d8590; margin-bottom: 4px; }
+.metric .vl { font-size: 22px; font-weight: 500; color: #e6edf3; }
+.metric .sb { font-size: 10px; color: #484f58; margin-top: 3px; }
+.metric.green .vl { color: #3fb950; }
+.metric.red .vl { color: #f85149; }
+.metric.blue .vl { color: #388bfd; }
+.warn { font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-top: 12px; display: none; }
+.warn.danger { background: rgba(248,81,73,.12); color: #f85149; border: 1px solid rgba(248,81,73,.3); }
+.warn.caution { background: rgba(210,153,34,.12); color: #d2a520; border: 1px solid rgba(210,153,34,.3); }
+.footer { font-size: 11px; color: #484f58; text-align: center; margin-top: 20px; }
+hr { border: none; border-top: 1px solid #21262d; margin: 16px 0; }
+optgroup { color: #7d8590; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Position Size Calculator</h1>
+  <p class="subtitle">AMarkets MT4 — точні специфікації контрактів</p>
+
+  <div class="card">
+    <div class="sec">Інструмент</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Символ</label>
+        <select id="sym" onchange="onSym()">
+          <optgroup label="Forex">
+            <option value="EURUSD">EURUSD</option>
+            <option value="GBPUSD">GBPUSD</option>
+            <option value="AUDUSD">AUDUSD</option>
+            <option value="NZDUSD">NZDUSD</option>
+            <option value="USDCAD">USDCAD</option>
+            <option value="USDCHF">USDCHF</option>
+            <option value="USDJPY">USDJPY</option>
+          </optgroup>
+          <optgroup label="CFD Метали">
+            <option value="XAUUSD">XAUUSD (Gold)</option>
+            <option value="XAGUSD">XAGUSD (Silver)</option>
+          </optgroup>
+          <optgroup label="CFD Енергія">
+            <option value="WTI">WTI (Oil)</option>
+            <option value="NGAS">NGAS (Gas)</option>
+          </optgroup>
+          <optgroup label="CFD Індекси">
+            <option value="SP500">S&P500</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field">
+        <label>Специфікація</label>
+        <div class="spec-info" id="spec-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Параметри угоди</div>
+    <div class="grid2">
+      <div class="field"><label>Макс. збиток ($)</label><input type="number" id="maxloss" value="500" min="1" oninput="calc()"></div>
+      <div class="field"><label>Стоп-лос (пунктів)</label><input type="number" id="slpips" value="50" min="1" oninput="calc()"></div>
+      <div class="field"><label>Ціна входу</label><input type="number" id="entry" value="1.13500" step="0.00001" oninput="calc()"></div>
+      <div class="field"><label>Тейк-профіт</label><input type="number" id="tp" value="1.15700" step="0.00001" oninput="calc()"></div>
+      <div class="field">
+        <label>Напрямок</label>
+        <select id="dir" onchange="calc()">
+          <option value="buy">Buy (Long)</option>
+          <option value="sell">Sell (Short)</option>
+        </select>
+      </div>
+      <div class="field"><label>Баланс рахунку ($)</label><input type="number" id="bal" value="5000" min="1" oninput="calc()"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Результат</div>
+    <div class="grid3">
+      <div class="metric green"><div class="lb">Об'єм (лоти)</div><div class="vl" id="r-lots">—</div><div class="sb" id="r-lots-sub"></div></div>
+      <div class="metric red">  <div class="lb">Макс. збиток</div><div class="vl" id="r-loss">—</div><div class="sb" id="r-loss-sub"></div></div>
+      <div class="metric green"><div class="lb">Потенц. профіт</div><div class="vl" id="r-profit">—</div><div class="sb" id="r-profit-sub"></div></div>
+      <div class="metric blue"> <div class="lb">R:R</div><div class="vl" id="r-rr">—</div><div class="sb">профіт / збиток</div></div>
+      <div class="metric">      <div class="lb">Ціна стоп-лосу</div><div class="vl" id="r-sl">—</div><div class="sb" id="r-sl-sub"></div></div>
+      <div class="metric">      <div class="lb">Ризик від балансу</div><div class="vl" id="r-pct">—</div><div class="sb">рекомендовано ≤2%</div></div>
+    </div>
+    <div class="warn danger" id="w1">⚠️ Ризик перевищує 5% балансу — дуже небезпечно</div>
+    <div class="warn caution" id="w2">⚠️ Ризик перевищує 2% балансу</div>
+  </div>
+
+  <div class="footer">AMarkets MT4 · Специфікації станом на 23.06.2026 · Forex пари: $10/піп для прямих, ~$7/піп для перехресних</div>
+</div>
+
+<script>
+const SPECS = {
+  EURUSD:{digits:5,contract:100000,marginCcy:"EUR",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 EUR · $10/піп"},
+  GBPUSD:{digits:5,contract:100000,marginCcy:"GBP",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 GBP · $10/піп"},
+  AUDUSD:{digits:5,contract:100000,marginCcy:"AUD",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 AUD · $10/піп"},
+  NZDUSD:{digits:5,contract:100000,marginCcy:"NZD",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 NZD · $10/піп"},
+  USDCAD:{digits:5,contract:100000,marginCcy:"USD",pipVal:7.05,pipSize:0.0001,type:"Forex",note:"100,000 USD · ~$7/піп"},
+  USDCHF:{digits:5,contract:100000,marginCcy:"USD",pipVal:11,  pipSize:0.0001,type:"Forex",note:"100,000 USD · ~$11/піп"},
+  USDJPY:{digits:3,contract:100000,marginCcy:"USD",pipVal:6.85,pipSize:0.01,  type:"Forex",note:"100,000 USD · ~$7/піп"},
+  XAUUSD:{digits:2,contract:100,   marginCcy:"USD",pipVal:0.1, pipSize:0.01,  type:"CFD",  note:"100 oz · тік $0.10"},
+  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00"},
+  WTI:   {digits:2,contract:1000,  marginCcy:"USD",pipVal:10,  pipSize:0.01,  type:"CFD",  note:"1,000 bbl · тік $10"},
+  NGAS:  {digits:3,contract:30000, marginCcy:"USD",pipVal:30,  pipSize:0.001, type:"CFD",  note:"30,000 MMBtu · тік $30"},
+  SP500: {digits:1,contract:1,     marginCcy:"USD",pipVal:0.1, pipSize:0.1,   type:"CFD",  note:"×1 · тік $0.10"},
+};
+const DEFS={
+  EURUSD:{e:"1.13500",t:"1.15700",sl:50},GBPUSD:{e:"1.31400",t:"1.33500",sl:50},
+  AUDUSD:{e:"0.69425",t:"0.71570",sl:50},NZDUSD:{e:"0.56700",t:"0.58500",sl:50},
+  USDCAD:{e:"1.41500",t:"1.39700",sl:50},USDCHF:{e:"0.81250",t:"0.79500",sl:50},
+  USDJPY:{e:"161.500",t:"162.670",sl:50},
+  XAUUSD:{e:"4219.52",t:"4276.09",sl:500},XAGUSD:{e:"62.536",t:"59.500",sl:500},
+  WTI:{e:"77.00",t:"70.00",sl:500},NGAS:{e:"3.140",t:"3.500",sl:100},
+  SP500:{e:"7300.0",t:"7800.0",sl:500},
+};
+function onSym(){
+  const sym=document.getElementById("sym").value;
+  const s=SPECS[sym],d=DEFS[sym]||{};
+  document.getElementById("spec-info").innerHTML=
+    "<strong>"+s.type+"</strong> · Маржа: "+s.marginCcy+"<br>"+s.note;
+  const step={1:"0.1",2:"0.01",3:"0.001",5:"0.00001"}[s.digits]||"0.00001";
+  document.getElementById("entry").step=step;
+  document.getElementById("tp").step=step;
+  if(d.e)document.getElementById("entry").value=d.e;
+  if(d.t)document.getElementById("tp").value=d.t;
+  if(d.sl)document.getElementById("slpips").value=d.sl;
+  calc();
+}
+function calc(){
+  const sym=document.getElementById("sym").value;
+  const s=SPECS[sym];
+  const maxloss=parseFloat(document.getElementById("maxloss").value)||500;
+  const slpips=parseFloat(document.getElementById("slpips").value)||50;
+  const entry=parseFloat(document.getElementById("entry").value)||0;
+  const tp=parseFloat(document.getElementById("tp").value)||0;
+  const dir=document.getElementById("dir").value;
+  const bal=parseFloat(document.getElementById("bal").value)||5000;
+  const pv=s.pipVal, ps=s.pipSize, dig=s.digits;
+  const lossPerLot=slpips*pv;
+  const lots=lossPerLot>0?maxloss/lossPerLot:0;
+  const lotsR=Math.round(lots*100)/100;
+  const tpPips=tp&&entry?Math.abs(tp-entry)/ps:0;
+  const profit=Math.round(lotsR*tpPips*pv);
+  const loss=Math.round(lotsR*lossPerLot);
+  const rr=loss>0?(profit/loss).toFixed(2):"—";
+  const pct=(loss/bal*100).toFixed(1);
+  const fmt={1:1,2:2,3:3,5:5}[dig]||5;
+  const slPrice=dir==="buy"?(entry-slpips*ps).toFixed(fmt):(entry+slpips*ps).toFixed(fmt);
+  document.getElementById("r-lots").textContent=lotsR.toFixed(2);
+  document.getElementById("r-lots-sub").textContent=s.note;
+  document.getElementById("r-loss").textContent="$"+loss;
+  document.getElementById("r-loss-sub").textContent=slpips+" пунктів × $"+pv+" × "+lotsR.toFixed(2);
+  document.getElementById("r-profit").textContent="$"+profit;
+  document.getElementById("r-profit-sub").textContent=Math.round(tpPips)+" пунктів до TP";
+  document.getElementById("r-rr").textContent=rr;
+  document.getElementById("r-sl").textContent=slPrice;
+  document.getElementById("r-sl-sub").textContent=dir==="buy"?"Entry − SL пунктів":"Entry + SL пунктів";
+  document.getElementById("r-pct").textContent=pct+"%";
+  document.getElementById("w1").style.display=parseFloat(pct)>5?"block":"none";
+  document.getElementById("w2").style.display=(parseFloat(pct)>2&&parseFloat(pct)<=5)?"block":"none";
+}
+onSym();
+</script>
+</body>
+</html>
