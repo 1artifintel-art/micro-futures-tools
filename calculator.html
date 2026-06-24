@@ -56,8 +56,8 @@ optgroup { color: #7d8590; font-size: 11px; }
             <option value="USDJPY">USDJPY</option>
           </optgroup>
           <optgroup label="CFD Метали">
-            <option value="XAUUSD">XAUUSD (Gold)</option>
-            <option value="XAGUSD">XAGUSD (Silver)</option>
+            <option value="XAUUSD">XAUUSDb (Gold)</option>
+            <option value="XAGUSD">XAGUSDb (Silver)</option>
           </optgroup>
           <optgroup label="CFD Енергія">
             <option value="WTI">WTI (Oil)</option>
@@ -120,7 +120,7 @@ const SPECS = {
   USDCHF:{digits:5,contract:100000,marginCcy:"USD",pipVal:11,  pipSize:0.0001,type:"Forex",note:"100,000 USD · ~$11/піп"},
   USDJPY:{digits:3,contract:100000,marginCcy:"USD",pipVal:6.85,pipSize:0.01,  type:"Forex",note:"100,000 USD · ~$7/піп"},
   XAUUSD:{digits:2,contract:100,   marginCcy:"USD",pipVal:0.1, pipSize:0.01,  type:"CFD",  note:"100 oz · тік $0.10"},
-  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00"},
+  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00 (XAGUSDb)"},
   WTI:   {digits:2,contract:1000,  marginCcy:"USD",pipVal:10,  pipSize:0.01,  type:"CFD",  note:"1,000 bbl · тік $10"},
   NGAS:  {digits:3,contract:30000, marginCcy:"USD",pipVal:30,  pipSize:0.001, type:"CFD",  note:"30,000 MMBtu · тік $30"},
   SP500: {digits:1,contract:1,     marginCcy:"USD",pipVal:0.1, pipSize:0.1,   type:"CFD",  note:"×1 · тік $0.10"},
