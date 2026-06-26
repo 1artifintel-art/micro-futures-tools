@@ -56,8 +56,8 @@ optgroup { color: #7d8590; font-size: 11px; }
             <option value="USDJPY">USDJPY</option>
           </optgroup>
           <optgroup label="CFD Метали">
-            <option value="XAUUSD">XAUUSDb (Gold)</option>
-            <option value="XAGUSD">XAGUSDb (Silver)</option>
+            <option value="XAUUSD">XAUUSD (Gold)</option>
+            <option value="XAGUSD">XAGUSD (Silver)</option>
           </optgroup>
           <optgroup label="CFD Енергія">
             <option value="WTI">WTI (Oil)</option>
@@ -120,7 +120,7 @@ const SPECS = {
   USDCHF:{digits:5,contract:100000,marginCcy:"USD",pipVal:11,  pipSize:0.0001,type:"Forex",note:"100,000 USD · ~$11/піп"},
   USDJPY:{digits:3,contract:100000,marginCcy:"USD",pipVal:6.85,pipSize:0.01,  type:"Forex",note:"100,000 USD · ~$7/піп"},
   XAUUSD:{digits:2,contract:100,   marginCcy:"USD",pipVal:0.1, pipSize:0.01,  type:"CFD",  note:"100 oz · тік $0.10"},
-  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00 (XAGUSDb)"},
+  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00"},
   WTI:   {digits:2,contract:1000,  marginCcy:"USD",pipVal:10,  pipSize:0.01,  type:"CFD",  note:"1,000 bbl · тік $10"},
   NGAS:  {digits:3,contract:30000, marginCcy:"USD",pipVal:30,  pipSize:0.001, type:"CFD",  note:"30,000 MMBtu · тік $30"},
   SP500: {digits:1,contract:1,     marginCcy:"USD",pipVal:0.1, pipSize:0.1,   type:"CFD",  note:"×1 · тік $0.10"},
@@ -181,6 +181,185 @@ function calc(){
   document.getElementById("w2").style.display=(parseFloat(pct)>2&&parseFloat(pct)<=5)?"block":"none";
 }
 onSym();
+
+  function calcCosts() {
+    const sym    = document.getElementById("sym").value;
+    const lots   = parseFloat(document.getElementById("c-lots").value) || 1;
+    const dir    = document.getElementById("c-dir").value;
+    const spread = parseFloat(document.getElementById("c-spread").value) || 0;
+    const swL    = parseFloat(document.getElementById("c-swapL").value) || 0;
+    const swS    = parseFloat(document.getElementById("c-swapS").value) || 0;
+    const nights = parseInt(document.getElementById("c-nights").value) || 0;
+    const weekend= parseInt(document.getElementById("c-weekend").value) || 0;
+    const s      = SPECS[sym];
+    const pv     = s ? s.pipVal : 10;
+    const commRT = 5;
+
+    const spreadCost  = spread * pv * lots;
+    const commOpen    = (commRT / 2) * lots;
+    const commClose   = (commRT / 2) * lots;
+    const swapNight   = (dir === "buy" ? swL : swS) * pv * lots;
+    const totalNights = nights + (weekend ? 2 : 0);
+    const swapTotal   = swapNight * totalNights;
+    const totalCost   = spreadCost + commOpen + spreadCost + commClose + swapTotal;
+    const breakeven   = Math.abs(totalCost) / (pv * lots);
+
+    const fmtNeg = v => "-$" + Math.abs(v).toFixed(2);
+    const fmt    = v => (v >= 0 ? "+$" : "-$") + Math.abs(v).toFixed(2);
+    const col    = v => v >= 0 ? "#3fb950" : "#f85149";
+
+    document.getElementById("cc-sp-open").textContent    = fmtNeg(spreadCost);
+    document.getElementById("cc-comm-open").textContent  = fmtNeg(commOpen);
+    document.getElementById("cc-sp-close").textContent   = fmtNeg(spreadCost);
+    document.getElementById("cc-comm-close").textContent = fmtNeg(commClose);
+    document.getElementById("cc-swap").textContent       = fmt(swapTotal);
+    document.getElementById("cc-swap").style.color       = col(swapTotal);
+    document.getElementById("cc-swap-label").textContent = totalNights > 0 ? "x" + totalNights + (weekend ? " (вих.)" : "") + " ночей" : "";
+    document.getElementById("cc-total").textContent      = fmtNeg(Math.abs(totalCost));
+    document.getElementById("cc-s-total").textContent    = "-$" + Math.abs(totalCost).toFixed(2);
+    document.getElementById("cc-s-swap1").textContent    = fmt(swapNight);
+    document.getElementById("cc-s-swap1").style.color    = col(swapNight);
+    document.getElementById("cc-s-swap1-sub").textContent= dir === "buy" ? "своп long/ніч" : "своп short/ніч";
+    document.getElementById("cc-breakeven").textContent  = Math.round(breakeven) + " піп";
+    document.getElementById("cc-warn-weekend").style.display = (weekend && Math.abs(swapNight * 3) > 10) ? "block" : "none";
+  }
+
+  function syncToCosts() {
+    const sym  = document.getElementById("sym").value;
+    const lots = document.getElementById("r-lots").textContent || "1.00";
+    const dir  = document.getElementById("dir").value;
+    document.getElementById("c-sym-display").textContent = sym;
+    document.getElementById("c-lots").value = lots;
+    document.getElementById("c-dir").value  = dir;
+    const swaps = {
+      EURUSD:{L:-7,S:-3},GBPUSD:{L:-5,S:-4},AUDUSD:{L:-3.2,S:-4.6},
+      NZDUSD:{L:-4,S:-3},USDCAD:{L:2.2,S:-10},USDCHF:{L:-3,S:1},
+      USDJPY:{L:-2,S:0.5},XAUUSD:{L:-65.5,S:34.2},XAGUSD:{L:-39,S:4.3},
+      WTI:{L:-15,S:5},NGAS:{L:-20,S:3},SP500:{L:-5,S:2}
+    };
+    if(swaps[sym]){
+      document.getElementById("c-swapL").value = swaps[sym].L;
+      document.getElementById("c-swapS").value = swaps[sym].S;
+    }
+    calcCosts();
+  }
+
+  const _origCalc = calc;
+  calc = function(){ _origCalc(); syncToCosts(); };
+  syncToCosts();
 </script>
+
+
+  <hr style="border:none;border-top:0.5px solid #30363d;margin:32px 0">
+
+  <h2 style="font-size:16px;font-weight:500;color:#e6edf3;margin-bottom:4px">Розрахунок витрат</h2>
+  <p style="font-size:12px;color:#7d8590;margin-bottom:20px">Автоматично підставляється з калькулятора вище. Введіть свопи з специфікації MT4.</p>
+
+  <div class="card">
+    <div class="sec">Параметри позиції</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Символ</label>
+        <div id="c-sym-display" style="font-size:14px;font-weight:500;color:#e6edf3;padding:8px 0">EURUSD</div>
+      </div>
+      <div class="field">
+        <label>Напрямок</label>
+        <select id="c-dir" onchange="calcCosts()">
+          <option value="buy">Buy (Long)</option>
+          <option value="sell">Sell (Short)</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <div class="field">
+        <label>Об'єм (лоти) <span style="font-size:11px;color:#7d8590">↑ з калькулятора</span></label>
+        <input type="number" id="c-lots" value="1.00" step="0.01" min="0.01" oninput="calcCosts()">
+      </div>
+      <div class="field">
+        <label>Спред (пунктів)</label>
+        <input type="number" id="c-spread" value="2" step="0.1" min="0" oninput="calcCosts()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Свопи (з специфікації MT4)</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Своп Long (пунктів/ніч)</label>
+        <input type="number" id="c-swapL" value="-7" step="0.1" oninput="calcCosts()">
+      </div>
+      <div class="field">
+        <label>Своп Short (пунктів/ніч)</label>
+        <input type="number" id="c-swapS" value="-3" step="0.1" oninput="calcCosts()">
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <div class="field">
+        <label>Ночей утримання</label>
+        <input type="number" id="c-nights" value="1" min="0" step="1" oninput="calcCosts()">
+      </div>
+      <div class="field">
+        <label>Через вихідні (п'ятниця)</label>
+        <select id="c-weekend" onchange="calcCosts()">
+          <option value="0">Ні</option>
+          <option value="1">Так (×3 ночі)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Розбивка витрат</div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+        <span style="color:#7d8590">Спред відкриття</span>
+        <span id="cc-sp-open" style="font-weight:500;color:#f85149">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+        <span style="color:#7d8590">Комісія ECN (вхід)</span>
+        <span id="cc-comm-open" style="font-weight:500;color:#f85149">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+        <span style="color:#7d8590">Спред закриття</span>
+        <span id="cc-sp-close" style="font-weight:500;color:#f85149">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+        <span style="color:#7d8590">Комісія ECN (вихід)</span>
+        <span id="cc-comm-close" style="font-weight:500;color:#f85149">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+        <span style="color:#7d8590">Своп <span id="cc-swap-label" style="font-size:11px"></span></span>
+        <span id="cc-swap" style="font-weight:500">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:14px">
+        <span style="font-weight:500;color:#e6edf3">Загальні витрати</span>
+        <span id="cc-total" style="font-weight:500;font-size:18px;color:#f85149">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-grid">
+    <div class="metric">
+      <div class="lb">Витрати разом</div>
+      <div class="value" id="cc-s-total" style="color:#f85149">—</div>
+      <div class="sub">усі витрати</div>
+    </div>
+    <div class="metric">
+      <div class="lb">Своп за ніч</div>
+      <div class="value" id="cc-s-swap1">—</div>
+      <div class="sub" id="cc-s-swap1-sub">при поточному напрямку</div>
+    </div>
+    <div class="metric">
+      <div class="lb">Беззбитковий рух</div>
+      <div class="value" id="cc-breakeven">—</div>
+      <div class="sub">пунктів щоб покрити витрати</div>
+    </div>
+  </div>
+
+  <div id="cc-warn-weekend" style="display:none;font-size:12px;padding:8px 12px;border-radius:8px;margin-top:12px;background:rgba(248,81,73,.12);color:#f85149;border:1px solid rgba(248,81,73,.3)">
+    Своп за вихідні суттєвий — розгляньте закриття до 00:00 п'ятниці
+  </div>
+
 </body>
 </html>
