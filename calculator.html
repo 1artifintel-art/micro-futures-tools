@@ -232,10 +232,12 @@ onSym();
     document.getElementById("c-lots").value = lots;
     document.getElementById("c-dir").value  = dir;
     const swaps = {
-      EURUSD:{L:-7,S:-3},GBPUSD:{L:-5,S:-4},AUDUSD:{L:-3.2,S:-4.6},
-      NZDUSD:{L:-4,S:-3},USDCAD:{L:2.2,S:-10},USDCHF:{L:-3,S:1},
-      USDJPY:{L:-2,S:0.5},XAUUSD:{L:-65.5,S:34.2},XAGUSD:{L:-39,S:4.3},
-      WTI:{L:-15,S:5},NGAS:{L:-20,S:3},SP500:{L:-5,S:2}
+      EURUSD:{L:-10.3,S:2.3},  GBPUSD:{L:-4.9,S:-4.1},
+      AUDUSD:{L:-3.2, S:-4.6}, NZDUSD:{L:-5.2,S:0.3},
+      USDCAD:{L:2.2,  S:-10},  USDCHF:{L:5.7, S:-15.3},
+      USDJPY:{L:9.3,  S:-17.9},XAUUSD:{L:-65.5,S:34.2},
+      XAGUSD:{L:-39,  S:4.3},  WTI:   {L:-0.4,S:-14},
+      NGAS:  {L:-6.1, S:-6},   SP500: {L:-12.9,S:2.1}
     };
     if(swaps[sym]){
       document.getElementById("c-swapL").value = swaps[sym].L;
