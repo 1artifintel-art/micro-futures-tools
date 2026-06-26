@@ -120,9 +120,9 @@ const SPECS = {
   USDCHF:{digits:5,contract:100000,marginCcy:"USD",pipVal:11,  pipSize:0.0001,type:"Forex",note:"100,000 USD · ~$11/піп"},
   USDJPY:{digits:3,contract:100000,marginCcy:"USD",pipVal:6.85,pipSize:0.01,  type:"Forex",note:"100,000 USD · ~$7/піп"},
   XAUUSD:{digits:2,contract:100,   marginCcy:"USD",pipVal:0.1, pipSize:0.01,  type:"CFD",  note:"100 oz · тік $0.10"},
-  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00"},
+  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00", swapNote:"⚠️ своп уточнити"},
   WTI:   {digits:2,contract:1000,  marginCcy:"USD",pipVal:10,  pipSize:0.01,  type:"CFD",  note:"1,000 bbl · тік $10"},
-  NGAS:  {digits:3,contract:30000, marginCcy:"USD",pipVal:30,  pipSize:0.001, type:"CFD",  note:"30,000 MMBtu · тік $30"},
+  NGAS:  {digits:3,contract:30000, marginCcy:"USD",pipVal:30,  pipSize:0.001, type:"CFD",  note:"30,000 MMBtu · тік $30", swapNote:"⚠️ своп уточнити"},
   SP500: {digits:1,contract:1,     marginCcy:"USD",pipVal:0.1, pipSize:0.1,   type:"CFD",  note:"×1 · тік $0.10"},
 };
 const DEFS={
@@ -191,14 +191,25 @@ onSym();
     const swS    = parseFloat(document.getElementById("c-swapS").value) || 0;
     const nights = parseInt(document.getElementById("c-nights").value) || 0;
     const weekend= parseInt(document.getElementById("c-weekend").value) || 0;
-    const s      = SPECS[sym];
-    const pv     = s ? s.pipVal : 10;
-    const commRT = 5;
+    const s          = SPECS[sym];
+    const pv         = s ? s.pipVal : 10;
+    // XAUUSDb і XAGUSDb мають комісію $7 round-turn, решта $5
+    const commRT     = (sym === "XAUUSD" || sym === "XAGUSD") ? 7 : 5;
+    // Логіка свопу:
+    // Forex (type=Forex): swap_pts × (pipVal/10) — pipVal це вартість піпа (10 пунктів)
+    // CFD digits≤2 (XAU,WTI,SP500): swap_pts × pipVal — pipVal це вартість пункту (тіку)
+    // CFD digits=3 (XAGUSD,NGAS): swap_pts × (pipVal/10) — наближено, уточнити з MT4 History
+    const swapNote   = (s && s.swapNote) ? s.swapNote : "";
+    const ptVal      = (s && s.type === "CFD" && s.digits <= 2)
+                       ? pv          // CFD: pipVal = tick_value = вартість 1 пункту
+                       : pv / 10;    // Forex + CFD digits=3: ділимо на 10
 
     const spreadCost  = spread * pv * lots;
     const commOpen    = (commRT / 2) * lots;
     const commClose   = (commRT / 2) * lots;
-    const swapNight   = (dir === "buy" ? swL : swS) * pv * lots;
+    // Своп: swap_pts × ptVal × lots
+    const swRaw      = (dir === "buy" ? swL : swS);
+    const swapNight  = swRaw * ptVal * lots;
     const totalNights = nights + (weekend ? 2 : 0);
     const swapTotal   = swapNight * totalNights;
     const totalCost   = spreadCost + commOpen + spreadCost + commClose + swapTotal;
@@ -222,6 +233,9 @@ onSym();
     document.getElementById("cc-s-swap1-sub").textContent= dir === "buy" ? "своп long/ніч" : "своп short/ніч";
     document.getElementById("cc-breakeven").textContent  = Math.round(breakeven) + " піп";
     document.getElementById("cc-warn-weekend").style.display = (weekend && Math.abs(swapNight * 3) > 10) ? "block" : "none";
+    // Попередження NGAS: своп unapproximate
+    const warnNgas = document.getElementById("cc-warn-ngas");
+    if (warnNgas) warnNgas.style.display = swapNote ? "block" : "none";
   }
 
   function syncToCosts() {
@@ -354,6 +368,10 @@ onSym();
 
   <div id="cc-warn-weekend" style="display:none;font-size:12px;padding:8px 12px;border-radius:8px;margin-top:12px;background:rgba(248,81,73,.12);color:#f85149;border:1px solid rgba(248,81,73,.3)">
     Своп за вихідні суттєвий — розгляньте закриття до 00:00 п'ятниці
+  </div>
+
+  <div id="cc-warn-ngas" style="display:none;font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px;background:rgba(210,153,34,.10);color:#d2a520;border:1px solid rgba(210,153,34,.3)">
+    ⚠️ Своп для цього інструменту розраховано наближено. Для точних даних: відкрийте позицію 0.01 лота на одну ніч → перевірте нарахування у MT4 → Журнал → Свопи
   </div>
 
 </body>
