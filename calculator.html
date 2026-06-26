@@ -168,20 +168,8 @@ optgroup { color: #7d8590; font-size: 11px; }
     <div class="sec">Розбивка витрат</div>
     <div style="display:flex;flex-direction:column;gap:0">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
-        <span style="color:#7d8590">Спред відкриття</span>
-        <span id="cc-sp-open" style="font-weight:500;color:#f85149">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
-        <span style="color:#7d8590">Комісія ECN (вхід)</span>
-        <span id="cc-comm-open" style="font-weight:500;color:#f85149">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
-        <span style="color:#7d8590">Спред закриття</span>
-        <span id="cc-sp-close" style="font-weight:500;color:#f85149">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
-        <span style="color:#7d8590">Комісія ECN (вихід)</span>
-        <span id="cc-comm-close" style="font-weight:500;color:#f85149">—</span>
+        <span style="color:#7d8590">Комісія ECN <span id="cc-comm-rt" style="font-size:11px;color:#555"></span></span>
+        <span id="cc-comm" style="font-weight:500;color:#f85149">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #21262d;font-size:13px">
         <span style="color:#7d8590">Своп <span id="cc-swap-label" style="font-size:11px"></span></span>
@@ -216,24 +204,24 @@ optgroup { color: #7d8590; font-size: 11px; }
     Своп за вихідні суттєвий — розгляньте закриття до 00:00 п'ятниці
   </div>
 
-  <div id="cc-warn-ngas" style="display:none;font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px;background:rgba(210,153,34,.10);color:#d2a520;border:1px solid rgba(210,153,34,.3)">
-    ⚠️ Своп для цього інструменту розраховано наближено. Для точних даних: відкрийте позицію 0.01 лота на одну ніч → перевірте нарахування у MT4 → Журнал → Свопи
-  </div>
+
 
 <script>
 const SPECS = {
-  EURUSD:{digits:5,contract:100000,marginCcy:"EUR",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 EUR · $10/піп"},
-  GBPUSD:{digits:5,contract:100000,marginCcy:"GBP",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 GBP · $10/піп"},
-  AUDUSD:{digits:5,contract:100000,marginCcy:"AUD",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 AUD · $10/піп"},
-  NZDUSD:{digits:5,contract:100000,marginCcy:"NZD",pipVal:10,  pipSize:0.0001,type:"Forex",note:"100,000 NZD · $10/піп"},
-  USDCAD:{digits:5,contract:100000,marginCcy:"USD",pipVal:7.05,pipSize:0.0001,type:"Forex",note:"100,000 USD · ~$7/піп"},
-  USDCHF:{digits:5,contract:100000,marginCcy:"USD",pipVal:11,  pipSize:0.0001,type:"Forex",note:"100,000 USD · ~$11/піп"},
-  USDJPY:{digits:3,contract:100000,marginCcy:"USD",pipVal:6.85,pipSize:0.01,  type:"Forex",note:"100,000 USD · ~$7/піп"},
-  XAUUSD:{digits:2,contract:100,   marginCcy:"USD",pipVal:0.1, pipSize:0.01,  type:"CFD",  note:"100 oz · тік $0.10"},
-  XAGUSD:{digits:3,contract:5000,  marginCcy:"USD",pipVal:5,   pipSize:0.001, type:"CFD",  note:"5,000 oz · тік $5.00", swapNote:"⚠️ своп уточнити"},
-  WTI:   {digits:2,contract:1000,  marginCcy:"USD",pipVal:10,  pipSize:0.01,  type:"CFD",  note:"1,000 bbl · тік $10"},
-  NGAS:  {digits:3,contract:30000, marginCcy:"USD",pipVal:30,  pipSize:0.001, type:"CFD",  note:"30,000 MMBtu · тік $30", swapNote:"⚠️ своп уточнити"},
-  SP500: {digits:1,contract:1,     marginCcy:"USD",pipVal:0.1, pipSize:0.1,   type:"CFD",  note:"×1 · тік $0.10"},
+  // pipVal = cost of pip per 1 lot (з калькулятора AMarkets)
+  // swapLval/swapSval = $ за 1 лот/ніч (з калькулятора AMarkets, ECN, 27.06.2026)
+  EURUSD:{digits:5,pipVal:10,   type:"Forex",commRT:5, swapLval:-10.00, swapSval:2.00,   note:"100,000 EUR · $10/піп"},
+  GBPUSD:{digits:5,pipVal:10,   type:"Forex",commRT:5, swapLval:-4.00,  swapSval:-5.00,  note:"100,000 GBP · $10/піп"},
+  AUDUSD:{digits:5,pipVal:10,   type:"Forex",commRT:5, swapLval:-3.00,  swapSval:-5.00,  note:"100,000 AUD · $10/піп"},
+  NZDUSD:{digits:5,pipVal:10,   type:"Forex",commRT:5, swapLval:-5.00,  swapSval:0.00,   note:"100,000 NZD · $10/піп"},
+  USDCAD:{digits:5,pipVal:7,    type:"Forex",commRT:5, swapLval:2.00,   swapSval:-7.00,  note:"100,000 USD · ~$7/піп"},
+  USDCHF:{digits:5,pipVal:12,   type:"Forex",commRT:5, swapLval:7.00,   swapSval:-19.00, note:"100,000 USD · ~$12/піп"},
+  USDJPY:{digits:3,pipVal:6,    type:"Forex",commRT:5, swapLval:6.00,   swapSval:-11.00, note:"100,000 USD · ~$6/піп"},
+  XAUUSD:{digits:2,pipVal:1,    type:"CFD",  commRT:7, swapLval:-66.00, swapSval:34.00,  note:"100 oz · $1/pt"},
+  XAGUSD:{digits:3,pipVal:5,    type:"CFD",  commRT:7, swapLval:-195.00,swapSval:21.00,  note:"5,000 oz · $5/pt"},
+  WTI:   {digits:2,pipVal:10,   type:"CFD",  commRT:5, swapLval:-4.00,  swapSval:-140.00,note:"1,000 bbl · $10/pt"},
+  NGAS:  {digits:3,pipVal:30,   type:"CFD",  commRT:5, swapLval:-183.00,swapSval:-180.00,note:"30,000 MMBtu · $30/pt"},
+  SP500: {digits:1,pipVal:1,    type:"CFD",  commRT:5, swapLval:-1.00,  swapSval:0.00,   note:"×1 · $1/pt"},
 };
 const DEFS={
   EURUSD:{e:"1.13500",t:"1.15700",sl:50},GBPUSD:{e:"1.31400",t:"1.33500",sl:50},
@@ -303,37 +291,27 @@ onSym();
     const weekend= parseInt(document.getElementById("c-weekend").value) || 0;
     const s          = SPECS[sym];
     const pv         = s ? s.pipVal : 10;
-    // XAUUSDb і XAGUSDb мають комісію $7 round-turn, решта $5
-    const commRT     = (sym === "XAUUSD" || sym === "XAGUSD") ? 7 : 5;
-    // Логіка свопу:
-    // Forex (type=Forex): swap_pts × (pipVal/10) — pipVal це вартість піпа (10 пунктів)
-    // CFD digits≤2 (XAU,WTI,SP500): swap_pts × pipVal — pipVal це вартість пункту (тіку)
-    // CFD digits=3 (XAGUSD,NGAS): swap_pts × (pipVal/10) — наближено, уточнити з MT4 History
-    const swapNote   = (s && s.swapNote) ? s.swapNote : "";
-    const ptVal      = (s && s.type === "CFD" && s.digits <= 2)
-                       ? pv          // CFD: pipVal = tick_value = вартість 1 пункту
-                       : pv / 10;    // Forex + CFD digits=3: ділимо на 10
+    // Комісія з SPECS (XAU/XAG=$7, решта=$5)
+    const commRT     = s ? s.commRT : 5;
+    // Своп напряму в $ з SPECS (реальні дані з калькулятора AMarkets ECN)
+    const swapLval   = s ? s.swapLval : 0;
+    const swapSval   = s ? s.swapSval : 0;
 
-    const spreadCost  = spread * pv * lots;
-    const commOpen    = (commRT / 2) * lots;
-    const commClose   = (commRT / 2) * lots;
-    // Своп: swap_pts × ptVal × lots
-    const swRaw      = (dir === "buy" ? swL : swS);
-    const swapNight  = swRaw * ptVal * lots;
+    const commTotal   = commRT * lots;  // round-turn, списується при закритті
+    // Своп: $ за 1 лот/ніч × лоти (реальні дані з калькулятора AMarkets)
+    const swapNight  = (dir === "buy" ? swapLval : swapSval) * lots;
     const totalNights = nights + (weekend ? 2 : 0);
     const swapTotal   = swapNight * totalNights;
-    const totalCost   = spreadCost + commOpen + spreadCost + commClose + swapTotal;
+    const totalCost   = commTotal + swapTotal;
     const breakeven   = Math.abs(totalCost) / (pv * lots);
 
     const fmtNeg = v => "-$" + Math.abs(v).toFixed(2);
     const fmt    = v => (v >= 0 ? "+$" : "-$") + Math.abs(v).toFixed(2);
     const col    = v => v >= 0 ? "#3fb950" : "#f85149";
 
-    document.getElementById("cc-sp-open").textContent    = fmtNeg(spreadCost);
-    document.getElementById("cc-comm-open").textContent  = fmtNeg(commOpen);
-    document.getElementById("cc-sp-close").textContent   = fmtNeg(spreadCost);
-    document.getElementById("cc-comm-close").textContent = fmtNeg(commClose);
-    document.getElementById("cc-swap").textContent       = fmt(swapTotal);
+    document.getElementById("cc-comm").textContent       = fmtNeg(commTotal);
+    document.getElementById("cc-comm-rt").textContent   = "$" + commRT + "/лот round-turn";
+    document.getElementById("cc-swap").textContent      = fmt(swapTotal);
     document.getElementById("cc-swap").style.color       = col(swapTotal);
     document.getElementById("cc-swap-label").textContent = totalNights > 0 ? "x" + totalNights + (weekend ? " (вих.)" : "") + " ночей" : "";
     document.getElementById("cc-total").textContent      = fmtNeg(Math.abs(totalCost));
@@ -343,9 +321,7 @@ onSym();
     document.getElementById("cc-s-swap1-sub").textContent= dir === "buy" ? "своп long/ніч" : "своп short/ніч";
     document.getElementById("cc-breakeven").textContent  = Math.round(breakeven) + " піп";
     document.getElementById("cc-warn-weekend").style.display = (weekend && Math.abs(swapNight * 3) > 10) ? "block" : "none";
-    // Попередження NGAS: своп unapproximate
-    const warnNgas = document.getElementById("cc-warn-ngas");
-    if (warnNgas) warnNgas.style.display = swapNote ? "block" : "none";
+
   }
 
   function syncToCosts() {
