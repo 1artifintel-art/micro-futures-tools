@@ -318,12 +318,12 @@ onSym();
       const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
         ? "<span style='color:#484f58'>Пт</span>"
         : "<span style='color:#484f58'>Ср</span>";
-      const td = "padding:0px 4px;border-bottom:0.5px solid #21262d;line-height:1.6";
+      const td = "padding:0 3px;border-bottom:0.5px solid #21262d";
       return `<tr>
-        <td style="${td};font-weight:500;font-size:11px">${sym}</td>
-        <td style="${td};text-align:right;font-size:11px;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
-        <td style="${td};text-align:right;font-size:11px;font-variant-numeric:tabular-nums">${fmtS(s.swapSval)}</td>
-        <td style="${td};text-align:right;font-size:9px">${triDay}</td>
+        <td style="${td};font-weight:500;font-size:12px">${sym}</td>
+        <td style="${td};text-align:right;font-size:12px;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
+        <td style="${td};text-align:right;font-size:12px;font-variant-numeric:tabular-nums">${fmtS(s.swapSval)}</td>
+        <td style="${td};text-align:right;font-size:10px">${triDay}</td>
       </tr>`;
     }).join("");
     document.getElementById("cc-swap-table").innerHTML = rows;
