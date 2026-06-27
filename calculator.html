@@ -339,20 +339,20 @@ onSym();
       const comm = s.commRT || 5;
       return `<tr>
         <td style="padding:1px 0;${bd};font-size:16px;font-weight:500;color:#e6edf3;white-space:nowrap">${sym}</td>
-        <td style="padding:1px 4px;${bd};text-align:right;font-size:13px;color:#f85149;white-space:nowrap;width:30px">$${comm}</td>
+        <td style="padding:1px 4px;${bd};text-align:right;font-size:16px;color:#f85149;white-space:nowrap;width:30px">$${comm}</td>
         <td style="padding:1px 4px;${bd};text-align:right">
           <input type="number" value="${ptsL}" step="0.1"
-            style="width:52px;font-size:12px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#7d8590;padding:1px 3px;text-align:right"
+            style="width:52px;font-size:14px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#7d8590;padding:1px 3px;text-align:right"
             oninput="onSwapPtsChange('${sym}','L',this.value)">
-          <div style="font-size:14px;font-weight:500;color:${colL}" id="swap-usd-${sym}-L">${fmtU(usdL)}</div>
+          <div style="font-size:17px;font-weight:500;color:${colL}" id="swap-usd-${sym}-L">${fmtU(usdL)}</div>
         </td>
         <td style="padding:1px 4px;${bd};text-align:right">
           <input type="number" value="${ptsS}" step="0.1"
-            style="width:52px;font-size:12px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#7d8590;padding:1px 3px;text-align:right"
+            style="width:52px;font-size:14px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#7d8590;padding:1px 3px;text-align:right"
             oninput="onSwapPtsChange('${sym}','S',this.value)">
-          <div style="font-size:14px;font-weight:500;color:${colS}" id="swap-usd-${sym}-S">${fmtU(usdS)}</div>
+          <div style="font-size:17px;font-weight:500;color:${colS}" id="swap-usd-${sym}-S">${fmtU(usdS)}</div>
         </td>
-        <td style="padding:1px 0;${bd};font-size:10px;text-align:right;color:#484f58;white-space:nowrap">${tri}</td>
+        <td style="padding:1px 0;${bd};font-size:12px;text-align:right;color:#484f58;white-space:nowrap">${tri}</td>
       </tr>`;
     }).join("");
     document.getElementById("cc-swap-table").innerHTML = rows;
