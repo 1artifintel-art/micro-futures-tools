@@ -209,11 +209,11 @@ optgroup { color: #7d8590; font-size: 11px; }
         <table style="width:100%;border-collapse:collapse" id="cc-swap-table-wrap">
           <thead>
             <tr>
-              <th style="text-align:left;font-size:10px;color:#7d8590;font-weight:500;padding:2px 0;border-bottom:0.5px solid #21262d">Символ</th>
-              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:30px">Ком.</th>
-              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:55px">Long</th>
-              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:55px">Short</th>
-              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 0;border-bottom:0.5px solid #21262d;width:20px">3×</th>
+              <th style="text-align:left;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:20%">Символ</th>
+              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:20%">Ком.</th>
+              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:20%">Long</th>
+              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:20%">Short</th>
+              <th style="text-align:right;font-size:10px;color:#7d8590;font-weight:500;padding:2px 4px;border-bottom:0.5px solid #21262d;width:20%">3×</th>
             </tr>
           </thead>
           <tbody id="cc-swap-table"></tbody>
@@ -338,8 +338,8 @@ onSym();
       const bd = "border-bottom:0.5px solid #21262d";
       const comm = s.commRT || 5;
       return `<tr>
-        <td style="padding:1px 0;${bd};font-size:16px;font-weight:500;color:#e6edf3;white-space:nowrap">${sym}</td>
-        <td style="padding:1px 4px;${bd};text-align:right;font-size:16px;color:#f85149;white-space:nowrap;width:30px">$${comm}</td>
+        <td style="padding:1px 4px;${bd};font-size:16px;font-weight:500;color:#e6edf3;width:20%">${sym}</td>
+        <td style="padding:1px 4px;${bd};text-align:right;font-size:16px;color:#f85149;white-space:nowrap;width:20%;text-align:right">$${comm}</td>
         <td style="padding:1px 4px;${bd};text-align:right">
           <input type="number" value="${ptsL}" step="0.1"
             style="width:52px;font-size:14px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#7d8590;padding:1px 3px;text-align:right"
@@ -352,7 +352,7 @@ onSym();
             oninput="onSwapPtsChange('${sym}','S',this.value)">
           <div style="font-size:17px;font-weight:500;color:${colS}" id="swap-usd-${sym}-S">${fmtU(usdS)}</div>
         </td>
-        <td style="padding:1px 0;${bd};font-size:12px;text-align:right;color:#484f58;white-space:nowrap">${tri}</td>
+        <td style="padding:1px 0;${bd};font-size:12px;text-align:right;color:#484f58;width:20%">${tri}</td>
       </tr>`;
     }).join("");
     document.getElementById("cc-swap-table").innerHTML = rows;
