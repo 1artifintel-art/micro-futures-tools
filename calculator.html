@@ -214,7 +214,7 @@ optgroup { color: #7d8590; font-size: 11px; }
       <table style="width:100%;border-collapse:collapse">
         <thead>
           <tr>
-            <th style="text-align:right;font-size:10px;font-weight:500;color:#7d8590;padding:2px 4px 2px 0;border-bottom:0.5px solid #21262d">Символ</th>
+            <th style="text-align:left;font-size:10px;font-weight:500;color:#7d8590;padding:2px 0;border-bottom:0.5px solid #21262d;width:90px">Символ</th>
             <th style="text-align:right;font-size:10px;font-weight:500;color:#7d8590;padding:2px 4px;border-bottom:0.5px solid #21262d;width:55px">Long</th>
             <th style="text-align:right;font-size:10px;font-weight:500;color:#7d8590;padding:2px 4px;border-bottom:0.5px solid #21262d;width:55px">Short</th>
             <th style="text-align:right;font-size:10px;font-weight:500;color:#7d8590;padding:2px 0;border-bottom:0.5px solid #21262d;width:20px">3×</th>
@@ -314,7 +314,7 @@ onSym();
     const rows = Object.entries(SPECS).map(([sym, s]) => {
       const tri = (sym==="WTI"||sym==="NGAS"||sym==="SP500") ? "Пт" : "Ср";
       return `<tr>
-        <td style="padding:1px 4px 1px 0;border-bottom:0.5px solid #21262d;font-size:18px;font-weight:500;color:#e6edf3;text-align:right">${sym}</td>
+        <td style="padding:1px 0;border-bottom:0.5px solid #21262d;font-size:18px;font-weight:500;color:#e6edf3;width:90px">${sym}</td>
         <td style="padding:1px 4px;border-bottom:0.5px solid #21262d;font-size:18px;text-align:right;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
         <td style="padding:1px 4px;border-bottom:0.5px solid #21262d;font-size:18px;text-align:right;font-variant-numeric:tabular-nums">${fmtS(s.swapSval)}</td>
         <td style="padding:1px 0;border-bottom:0.5px solid #21262d;font-size:10px;text-align:right;color:#484f58">${tri}</td>
