@@ -211,20 +211,12 @@ optgroup { color: #7d8590; font-size: 11px; }
 
     <div class="card">
       <div class="sec" style="margin-bottom:6px">Свопи · ECN · 1 лот</div>
-      <table style="width:100%;border-collapse:collapse;table-layout:fixed">
-        <colgroup>
-          <col><col style="width:70px"><col style="width:70px"><col style="width:30px">
-        </colgroup>
-        <thead>
-          <tr>
-            <th style="text-align:left;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
-            <th style="text-align:right;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590;text-align:center">Long</th>
-            <th style="text-align:right;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590;text-align:center">Short</th>
-            <th style="text-align:right;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
-          </tr>
-        </thead>
-        <tbody id="cc-swap-table"></tbody>
-      </table>
+      <div style="display:flex;justify-content:flex-end;gap:0;margin-bottom:4px;font-size:10px;color:#7d8590;font-weight:500">
+        <div style="width:60px;text-align:right">Long</div>
+        <div style="width:60px;text-align:right">Short</div>
+        <div style="width:24px;text-align:right">3×</div>
+      </div>
+      <div id="cc-swap-table"></div>
       <div style="font-size:9px;color:#484f58;margin-top:4px">27.06.2026 · AMarkets ECN</div>
     </div>
 
@@ -315,16 +307,13 @@ onSym();
         : `<span style="color:#f85149">-$${abs}</span>`;
     };
     const rows = Object.entries(SPECS).map(([sym, s]) => {
-      const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
-        ? "<span style='color:#484f58'>Пт</span>"
-        : "<span style='color:#484f58'>Ср</span>";
-      const td = "padding:0;border-bottom:0.5px solid #21262d";
-      return `<tr>
-        <td style="${td};font-weight:500;font-size:18px">${sym}</td>
-        <td style="${td};text-align:center;font-size:18px;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
-        <td style="${td};text-align:center;font-size:18px;font-variant-numeric:tabular-nums">${fmtS(s.swapSval)}</td>
-        <td style="${td};text-align:right;font-size:13px">${triDay}</td>
-      </tr>`;
+      const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500") ? "Пт" : "Ср";
+      return `<div style="display:flex;align-items:center;border-bottom:0.5px solid #21262d;padding:1px 0">
+        <div style="flex:1;font-weight:500;font-size:18px;color:#e6edf3">${sym}</div>
+        <div style="width:60px;text-align:right;font-size:18px;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</div>
+        <div style="width:60px;text-align:right;font-size:18px;font-variant-numeric:tabular-nums">${fmtS(s.swapSval)}</div>
+        <div style="width:24px;text-align:right;font-size:10px;color:#484f58">${triDay}</div>
+      </div>`;
     }).join("");
     document.getElementById("cc-swap-table").innerHTML = rows;
   }
