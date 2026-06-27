@@ -118,26 +118,7 @@ optgroup { color: #7d8590; font-size: 11px; }
   <hr style="border:none;border-top:0.5px solid #30363d;margin:32px 0">
   <h2 style="font-size:16px;font-weight:500;color:#e6edf3;margin-bottom:16px">Розрахунок витрат</h2>
 
-  <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start">
-
-    <div class="card" style="position:sticky;top:12px">
-      <div class="sec" style="margin-bottom:8px">Свопи · ECN · 1 лот</div>
-      <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
-        <colgroup>
-          <col style="width:40%"><col style="width:22%"><col style="width:22%"><col style="width:16%">
-        </colgroup>
-        <thead>
-          <tr style="background:#0d1117">
-            <th style="text-align:left;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
-            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
-            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
-            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
-          </tr>
-        </thead>
-        <tbody id="cc-swap-table"></tbody>
-      </table>
-      <div style="font-size:10px;color:#484f58;margin-top:6px">27.06.2026 · AMarkets ECN</div>
-    </div>
+  <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:16px;align-items:start">
 
     <div style="display:flex;flex-direction:column;gap:12px">
 
@@ -229,6 +210,27 @@ optgroup { color: #7d8590; font-size: 11px; }
         </div>
       </div>
 
+    </div>
+
+  </div>
+
+    <div class="card" style="position:sticky;top:12px">
+      <div class="sec" style="margin-bottom:8px">Свопи · ECN · 1 лот</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
+        <colgroup>
+          <col style="width:40%"><col style="width:22%"><col style="width:22%"><col style="width:16%">
+        </colgroup>
+        <thead>
+          <tr style="background:#0d1117">
+            <th style="text-align:left;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
+            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
+            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
+            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
+          </tr>
+        </thead>
+        <tbody id="cc-swap-table"></tbody>
+      </table>
+      <div style="font-size:10px;color:#484f58;margin-top:6px">27.06.2026 · AMarkets ECN</div>
     </div>
 
   </div>
@@ -461,4 +463,4 @@ onSym();
 </script>
 </body>
 </html>
-<!-- built 1782551286 -->
+<!-- built 1782551461 -->
