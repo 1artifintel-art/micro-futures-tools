@@ -150,6 +150,34 @@ optgroup { color: #7d8590; font-size: 11px; }
         <input type="hidden" id="c-weekend" value="0">
       </div>
 
+
+      <div class="card">
+        <div class="sec">Спред</div>
+        <div class="grid2">
+          <div class="field">
+            <label>Ask</label>
+            <input type="number" id="c-ask" step="0.00001" placeholder="1.13850" oninput="calcSpread()">
+          </div>
+          <div class="field">
+            <label>Bid</label>
+            <input type="number" id="c-bid" step="0.00001" placeholder="1.13840" oninput="calcSpread()">
+          </div>
+        </div>
+        <div id="cc-spread-info" style="margin-top:8px;font-size:12px;color:#7d8590;min-height:16px"></div>
+        <input type="hidden" id="c-spread" value="0">
+        <div id="cc-breakeven-wrap" style="display:none;margin-top:10px;border-top:0.5px solid #21262d;padding-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+            <span style="color:#7d8590">Спред</span>
+            <span id="cc-spread-pips-val" style="font-weight:500">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px">
+            <span style="color:#7d8590">До беззбитку</span>
+            <span id="cc-breakeven-spread" style="font-weight:500;color:#e6edf3">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
       <div class="card">
         <div class="sec">Витрати</div>
         <div style="display:flex;flex-direction:column;gap:0">
@@ -192,34 +220,6 @@ optgroup { color: #7d8590; font-size: 11px; }
         </table>
         <div style="font-size:9px;color:#484f58;margin-top:4px">27.06.2026 · AMarkets ECN</div>
       </div>
-
-      <div class="card">
-        <div class="sec">Спред</div>
-        <div class="grid2">
-          <div class="field">
-            <label>Ask</label>
-            <input type="number" id="c-ask" step="0.00001" placeholder="1.13850" oninput="calcSpread()">
-          </div>
-          <div class="field">
-            <label>Bid</label>
-            <input type="number" id="c-bid" step="0.00001" placeholder="1.13840" oninput="calcSpread()">
-          </div>
-        </div>
-        <div id="cc-spread-info" style="margin-top:8px;font-size:12px;color:#7d8590;min-height:16px"></div>
-        <input type="hidden" id="c-spread" value="0">
-        <div id="cc-breakeven-wrap" style="display:none;margin-top:10px;border-top:0.5px solid #21262d;padding-top:8px">
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-            <span style="color:#7d8590">Спред</span>
-            <span id="cc-spread-pips-val" style="font-weight:500">—</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:13px">
-            <span style="color:#7d8590">До беззбитку</span>
-            <span id="cc-breakeven-spread" style="font-weight:500;color:#e6edf3">—</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
 
   </div>
 <script>
