@@ -165,10 +165,7 @@ optgroup { color: #7d8590; font-size: 11px; }
       <div class="card">
         <div class="sec">Витрати</div>
         <div style="display:flex;flex-direction:column;gap:0">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid #21262d;font-size:13px">
-            <span style="color:#7d8590">Спред відкриття <span id="cc-spread-pips" style="font-size:11px"></span></span>
-            <span id="cc-spread-cost" style="font-weight:500;color:#f85149">—</span>
-          </div>
+
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid #21262d;font-size:13px">
             <span style="color:#7d8590">Комісія ECN <span id="cc-comm-rt" style="font-size:11px;color:#555"></span></span>
             <span id="cc-comm" style="font-weight:500;color:#f85149">—</span>
@@ -182,10 +179,7 @@ optgroup { color: #7d8590; font-size: 11px; }
             <span id="cc-total" style="font-weight:500;font-size:18px;color:#f85149">—</span>
           </div>
         </div>
-        <div style="border-top:0.5px solid #21262d;padding-top:10px;margin-top:2px;text-align:center">
-          <div id="cc-breakeven" style="font-size:22px;font-weight:500;color:#e6edf3">—</div>
-          <div id="cc-breakeven-sub" style="font-size:11px;color:#7d8590;margin-top:2px">піп · $ щоб покрити витрати</div>
-        </div>
+
         <div id="cc-warn-weekend" style="display:none;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:10px;background:rgba(248,81,73,.12);color:#f85149;border:1px solid rgba(248,81,73,.3)">
           Потрійний своп потрапляє в діапазон — врахований автоматично
         </div>
@@ -225,6 +219,16 @@ optgroup { color: #7d8590; font-size: 11px; }
         </div>
         <div id="cc-spread-info" style="margin-top:8px;font-size:12px;color:#7d8590;min-height:16px"></div>
         <input type="hidden" id="c-spread" value="0">
+        <div id="cc-breakeven-wrap" style="display:none;margin-top:10px;border-top:0.5px solid #21262d;padding-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+            <span style="color:#7d8590">Спред</span>
+            <span id="cc-spread-pips-val" style="font-weight:500">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px">
+            <span style="color:#7d8590">До беззбитку</span>
+            <span id="cc-breakeven-spread" style="font-weight:500;color:#e6edf3">—</span>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -343,6 +347,7 @@ onSym();
     document.getElementById("c-spread").value = spreadPips.toFixed(1);
     document.getElementById("cc-spread-info").textContent = `Спред: ${spreadPips.toFixed(1)} піп · $${spreadUSD.toFixed(2)} на ${lots} лот(ів)`;
     calcCosts();
+    updateBreakevenWithSpread();
   }
 
   function calcDates() {
@@ -407,7 +412,7 @@ onSym();
     // totalCost = всі витрати включно зі спредом
     // beP = беззбитковий рух без спреду (комісія + своп) в піпах
     // spreadPips вже "в мінусі" з відкриття, тому додаємо окремо
-    const totalAbs = Math.abs(totalCost);
+    const totalAbs = Math.abs(commTotal) + Math.abs(swapTotal);
     const beP = pv > 0 ? (Math.abs(commTotal + swapTotal) / (pv * lots)) : 0;
     const bePwithSpread = beP + spreadPips;
 
@@ -424,6 +429,29 @@ onSym();
       ? `спред ${spreadPips.toFixed(1)} + комісія/своп ${beP.toFixed(1)} піп`
       : `піп · $ щоб покрити комісію та своп`;
     document.getElementById("cc-breakeven-sub").textContent = beSub;
+  }
+
+  function updateBreakevenWithSpread() {
+    const spreadPips = parseFloat(document.getElementById("c-spread").value) || 0;
+    const wrap = document.getElementById("cc-breakeven-wrap");
+    if (!wrap) return;
+    if (spreadPips <= 0) { wrap.style.display = "none"; return; }
+    const sym = document.getElementById("sym").value;
+    const s = SPECS[sym];
+    const pv = s ? s.pipVal : 10;
+    const lots = parseFloat(document.getElementById("c-lots-display").textContent) || 1;
+    const commTotal = (s ? s.commRT : 5) * lots;
+    const dir = document.getElementById("dir").value;
+    const swapNight = (dir==="buy" ? (s ? s.swapLval : 0) : (s ? s.swapSval : 0)) * lots;
+    const nights = parseInt(document.getElementById("c-nights").value) || 0;
+    const triple = parseInt(document.getElementById("c-weekend").value) || 0;
+    const swapTotal = swapNight * (nights + triple*2);
+    const totalAbs = Math.abs(commTotal) + Math.abs(swapTotal);
+    const beP = pv > 0 ? (totalAbs / (pv * lots)) : 0;
+    const bePwithSpread = beP + spreadPips;
+    wrap.style.display = "block";
+    document.getElementById("cc-spread-pips-val").textContent = spreadPips.toFixed(1) + " піп";
+    document.getElementById("cc-breakeven-spread").textContent = bePwithSpread.toFixed(1) + " піп · $" + (totalAbs + spreadPips*pv*lots).toFixed(2);
   }
 
   function syncToCosts() {
