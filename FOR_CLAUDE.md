@@ -1,104 +1,131 @@
 # FOR_CLAUDE — micro-futures-tools
 
-Документація для Claude про калькулятор позицій та витрат.
+Документація для Claude про калькулятор позицій та витрат на AMarkets MT4.
 
-**URL калькулятора:** https://1artifintel-art.github.io/micro-futures-tools/calculator.html
-**Репо:** https://github.com/1artifintel-art/micro-futures-tools (публічне)
+**URL:** https://1artifintel-art.github.io/micro-futures-tools/calculator.html  
+**Репо:** https://github.com/1artifintel-art/micro-futures-tools  
+**Детальна документація:** README.md в цьому репо
 
 ---
 
-## КАЛЬКУЛЯТОР ВИТРАТ — структура і формули
+## СТРУКТУРА СТОРІНКИ
 
-Калькулятор складається з двох секцій на одній сторінці:
-1. **Розмір позиції** (вгорі) — об'єм лотів, SL ціна, профіт, R:R
-2. **Розрахунок витрат** (нижче) — автоматично підтягує символ, напрямок і лоти з секції 1
+Одна HTML сторінка з двома секціями:
 
-### Складові витрат
+1. **Position Size Calculator** — розрахунок лотів, SL, профіт, R:R
+2. **Розрахунок витрат** — двоколонковий layout
 
-| Витрата | Формула | Примітка |
-|---|---|---|
-| Спред відкриття | `spread_pips × pipVal × lots` | Спред вводиться в **піпах** (наприклад 0.3) |
-| Комісія ECN вхід | `($5 / 2) × lots` | $5 round-turn = $2.5 вхід + $2.5 вихід |
-| Спред закриття | `spread_pips × pipVal × lots` | Рахується двічі (вхід і вихід) |
-| Комісія ECN вихід | `($5 / 2) × lots` | |
-| Своп | `swap_pts × (pipVal/10) × lots × ночей` | Своп в **пунктах MT4** |
+**Ліва колонка:** Параметри позиції → Дати позиції → Витрати → Спред  
+**Права колонка:** Таблиця Свопи · ECN · 1 лот
+
+---
+
+## SPECS — дані інструментів (актуальні на 27.06.2026)
+
+```js
+EURUSD:{digits:5, pipSize:0.0001, pipVal:10,  commRT:5, swapLval:-10.00, swapSval:2.00}
+GBPUSD:{digits:5, pipSize:0.0001, pipVal:10,  commRT:5, swapLval:-4.00,  swapSval:-5.00}
+AUDUSD:{digits:5, pipSize:0.0001, pipVal:10,  commRT:5, swapLval:-3.00,  swapSval:-5.00}
+NZDUSD:{digits:5, pipSize:0.0001, pipVal:10,  commRT:5, swapLval:-5.00,  swapSval:0.00}
+USDCAD:{digits:5, pipSize:0.0001, pipVal:7,   commRT:5, swapLval:2.00,   swapSval:-7.00}
+USDCHF:{digits:5, pipSize:0.0001, pipVal:12,  commRT:5, swapLval:7.00,   swapSval:-19.00}
+USDJPY:{digits:3, pipSize:0.01,   pipVal:6,   commRT:5, swapLval:6.00,   swapSval:-11.00}
+XAUUSD:{digits:2, pipSize:0.01,   pipVal:1,   commRT:7, swapLval:-66.00, swapSval:34.00}
+XAGUSD:{digits:3, pipSize:0.001,  pipVal:5,   commRT:7, swapLval:-195.00,swapSval:21.00}
+WTI:   {digits:2, pipSize:0.01,   pipVal:10,  commRT:5, swapLval:-4.00,  swapSval:-140.00}
+NGAS:  {digits:3, pipSize:0.001,  pipVal:30,  commRT:5, swapLval:-183.00,swapSval:-180.00}
+SP500: {digits:1, pipSize:0.1,    pipVal:1,   commRT:5, swapLval:-1.00,  swapSval:0.00}
+```
+
+- `pipVal` — $ за 1 піп на 1 лот (з калькулятора AMarkets ECN)
+- `commRT` — комісія round-turn $/лот ($5 всі, $7 для XAU/XAG)
+- `swapLval/swapSval` — $/лот/ніч (з калькулятора AMarkets ECN, 27.06.2026)
+
+---
+
+## SWAP_PTS — пункти свопів з MT4 (редаговані в таблиці)
+
+```js
+EURUSD:{L:-10.3, S:2.3},  GBPUSD:{L:-4.9,  S:-4.1},
+AUDUSD:{L:-3.2,  S:-4.6}, NZDUSD:{L:-5.2,  S:0.3},
+USDCAD:{L:2.2,   S:-10},  USDCHF:{L:5.7,   S:-15.3},
+USDJPY:{L:9.3,   S:-17.9},XAUUSD:{L:-65.5, S:34.2},
+XAGUSD:{L:-39,   S:4.3},  WTI:   {L:-0.4,  S:-14},
+NGAS:  {L:-6.1,  S:-6},   SP500: {L:-12.9, S:2.1}
+```
+
+---
+
+## ФОРМУЛИ РОЗРАХУНКІВ
+
+### Position Size Calculator
+```
+lots     = maxloss / (slpips × pipVal)
+loss     = round(lots,2) × slpips × pipVal
+profit   = round(lots,2) × tpPips × pipVal
+rr       = profit / loss
+slPrice  = entry ± slpips × pipSize
+```
+
+### Витрати
+```
+commTotal        = commRT × lots
+swapNight        = (buy ? swapLval : swapSval) × lots
+totalNights      = nights + tripleCount × 2
+swapTotal        = swapNight × totalNights
+totalCostSigned  = swapTotal - commTotal
+```
+
+- `totalCostSigned` < 0 → витрата (червоний)
+- `totalCostSigned` > 0 → прибуток від свопу (зелений)
+
+### Дати і потрійний своп
+```
+tripleDay = CFD(WTI/NGAS/SP500) ? 5(пятниця) : 3(середа)
+Для кожного дня між відкриттям і закриттям:
+  якщо не вихідний → nights++
+  якщо dow === tripleDay → tripleCount++
+totalNights = nights + tripleCount × 2
+```
 
 ### Спред
-
-Вводиться в **піпах** (не пунктах):
-- 0.3 піпа = 3 пункти MT4 = 0.00003 для EURUSD
-- Типовий спред AMarkets ECN: 0.1-0.5 піпа на мажорах
-
-### Своп — формула і точність
-
-Формула в коді: `swap_pts × (pipVal/10) × lots`
-
-**Для прямих пар** (EURUSD, GBPUSD, AUDUSD, NZDUSD) — результат точний.
-
-**PENDING для перехресних пар** (USDCAD, USDCHF, USDJPY) — реальний своп MT4 залежить від поточного курсу:
 ```
-своп $ = swap_pts × contract × tick_size / current_price × lots
+spreadPips = |ask - bid| / pipSize
+spreadUSD  = spreadPips × pipVal × lots
+беззбиток  = (|totalCostSigned| / pipVal / lots) + spreadPips  піп
 ```
-Приклад USDCADb SELL 0.50 лота, своп -10 пунктів, курс 1.419:
+
+### Таблиця свопів — зміна пунктів
 ```
--10 × 100,000 × 0.0001 / 1.419 × 0.50 = -$35.24 (реальний -$32.42)
+ptVal   = baseUSD / basePts
+newUSD  = newPts × ptVal
+→ оновлює SPECS[sym].swapLval/swapSval і SWAP_PTS[sym]
+→ викликає calcCosts()
 ```
-Різниця ~$3 через зміну курсу на момент нарахування. Калькулятор дає наближений результат.
-
-### Потрійний своп
-
-- **Forex пари** (EURUSD, GBPUSD, AUDUSD, NZDUSD, USDCAD, USDCHF, USDJPY): потрійний у **середу**
-- **CFD** (WTI, NGAS, S&P500): потрійний у **п'ятницю**
-- **Через вихідні** (п'ятниця → понеділок): +2 додаткові ночі
-
-### Комісія ECN AMarkets
-
-- Forex пари: **$5 round-turn** за стандартний лот
-- CFD метали (XAUUSDb, XAGUSDb): **$7 round-turn**
-- CFD енергія/індекси: **$5 round-turn**
-
-*Примітка: в поточній версії калькулятора комісія $5 для всіх — потребує уточнення для металів ($7).*
 
 ---
 
-## РЕАЛЬНІ СВОПИ AMarkets ECN Real (26.06.2026)
+## JS ФУНКЦІЇ
 
-| Символ | Своп Long | Своп Short | Потрійний |
-|---|---|---|---|
-| AUDUSDb | -3.2 | -4.6 | Середа |
-| EURUSDb | -10.3 | +2.3 | Середа |
-| GBPUSDb | -4.9 | -4.1 | Середа |
-| NZDUSDb | -5.2 | +0.3 | Середа |
-| USDCADb | +2.2 | -10 | Середа |
-| USDCHFb | +5.7 | -15.3 | Середа |
-| USDJPYb | +9.3 | -17.9 | Середа |
-| XAUUSDb | -65.5 | +34.2 | Середа |
-| XAGUSDb | -39 | +4.3 | Середа |
-| WTI | -0.4 | -14 | **П'ятниця** |
-| NGAS | -6.1 | -6 | **П'ятниця** |
-| S&P500 | -12.9 | +2.1 | **П'ятниця** |
+| Функція | Тригер |
+|---------|--------|
+| `calc()` | Зміна будь-якого поля секції 1 |
+| `syncToCosts()` | Після `calc()` |
+| `calcCosts()` | Зміна дат, свопів, будь-чого в секції 2 |
+| `calcSpread()` | Зміна Ask або Bid |
+| `calcDates()` | Зміна дат |
+| `updateBreakevenWithSpread()` | В кінці `calcCosts()` і `calcSpread()` |
+| `renderSwapTable()` | При ініціалізації |
+| `onSwapPtsChange(sym,dir,pts)` | Зміна пунктів в таблиці |
+| `onSym()` | Зміна символу |
 
 ---
 
-## СИНХРОНІЗАЦІЯ МІЖ СЕКЦІЯМИ
+## ВІДОМІ ОСОБЛИВОСТІ
 
-Секція витрат автоматично отримує з секції розміру позиції:
-- Символ (відображається як текст)
-- Напрямок Buy/Sell
-- Об'єм лотів (з результату розрахунку)
-- Свопи підставляються автоматично з таблиці вище
+- Свопи в таблиці редаговані — при оновленні пунктів перераховуються $ і оновлюється SPECS
+- Своп може бути позитивним (дохід) — тоді `totalCostSigned` > 0, показується зеленим
+- Спред не входить у "Загальні витрати" — показується окремо у блоці Спред як частина беззбитку
+- Блок Спред показує результат тільки після введення Ask і Bid
 
-Користувач вводить вручну лише:
-- Спред (в піпах, наприклад 0.3)
-- Кількість ночей утримання
-- Чи через вихідні (п'ятниця → понеділок)
-
----
-
-## PENDING ITEMS
-
-1. **Формула свопу для перехресних пар** — USDCAD, USDCHF, USDJPY потребують врахування поточного курсу для точного розрахунку
-2. **Комісія для металів** — XAUUSDb і XAGUSDb мають комісію $7 round-turn (зараз в коді $5)
-3. **Оновлення свопів** — свопи змінюються щотижня, треба оновлювати з MT4
-
-*Оновлено: 26.06.2026*
+*Оновлено: 27.06.2026*
