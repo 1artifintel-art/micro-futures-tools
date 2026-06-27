@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Position Size Calculator — AMarkets MT4</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; padding: 20px; }
+.container { max-width: 680px; margin: 0 auto; }
+h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; color: #e6edf3; }
+.subtitle { font-size: 13px; color: #7d8590; margin-bottom: 24px; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.sec { font-size: 11px; font-weight: 500; color: #7d8590; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: #7d8590; }
+.field input, .field select { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-size: 14px; padding: 8px 10px; width: 100%; transition: border-color .15s; }
+.field input:focus, .field select:focus { outline: none; border-color: #388bfd; }
+.field select option { background: #161b22; }
+.spec-info { font-size: 12px; color: #7d8590; padding: 6px 0; line-height: 1.7; }
+.metric { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 12px 14px; }
+.metric .lb { font-size: 11px; color: #7d8590; margin-bottom: 4px; }
+.metric .vl { font-size: 22px; font-weight: 500; color: #e6edf3; }
+.metric .sb { font-size: 10px; color: #484f58; margin-top: 3px; }
+.metric.green .vl { color: #3fb950; }
+.metric.red .vl { color: #f85149; }
+.metric.blue .vl { color: #388bfd; }
+.warn { font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-top: 12px; display: none; }
+.warn.danger { background: rgba(248,81,73,.12); color: #f85149; border: 1px solid rgba(248,81,73,.3); }
+.warn.caution { background: rgba(210,153,34,.12); color: #d2a520; border: 1px solid rgba(210,153,34,.3); }
+.footer { font-size: 11px; color: #484f58; text-align: center; margin-top: 20px; }
+hr { border: none; border-top: 1px solid #21262d; margin: 16px 0; }
+optgroup { color: #7d8590; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Position Size Calculator</h1>
+  <p class="subtitle">AMarkets MT4 — точні специфікації контрактів</p>
+
+  <div class="card">
+    <div class="sec">Інструмент</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Символ</label>
+        <select id="sym" onchange="onSym()">
+          <optgroup label="Forex">
+            <option value="EURUSD">EURUSD</option>
+            <option value="GBPUSD">GBPUSD</option>
+            <option value="AUDUSD">AUDUSD</option>
+            <option value="NZDUSD">NZDUSD</option>
+            <option value="USDCAD">USDCAD</option>
+            <option value="USDCHF">USDCHF</option>
+            <option value="USDJPY">USDJPY</option>
+          </optgroup>
+          <optgroup label="CFD Метали">
+            <option value="XAUUSD">XAUUSD (Gold)</option>
+            <option value="XAGUSD">XAGUSD (Silver)</option>
+          </optgroup>
+          <optgroup label="CFD Енергія">
+            <option value="WTI">WTI (Oil)</option>
+            <option value="NGAS">NGAS (Gas)</option>
+          </optgroup>
+          <optgroup label="CFD Індекси">
+            <option value="SP500">S&P500</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field">
+        <label>Специфікація</label>
+        <div class="spec-info" id="spec-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Параметри угоди</div>
+    <div class="grid2">
+      <div class="field"><label>Макс. збиток ($)</label><input type="number" id="maxloss" value="500" min="1" oninput="calc()"></div>
+      <div class="field"><label>Стоп-лос (пунктів)</label><input type="number" id="slpips" value="50" min="1" oninput="calc()"></div>
+      <div class="field"><label>Ціна входу</label><input type="number" id="entry" value="1.13500" step="0.00001" oninput="calc()"></div>
+      <div class="field"><label>Тейк-профіт</label><input type="number" id="tp" value="1.15700" step="0.00001" oninput="calc()"></div>
+      <div class="field">
+        <label>Напрямок</label>
+        <select id="dir" onchange="calc()">
+          <option value="buy">Buy (Long)</option>
+          <option value="sell">Sell (Short)</option>
+        </select>
+      </div>
+      <div class="field"><label>Баланс рахунку ($)</label><input type="number" id="bal" value="5000" min="1" oninput="calc()"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">Результат</div>
+    <div class="grid3">
+      <div class="metric green"><div class="lb">Об'єм (лоти)</div><div class="vl" id="r-lots">—</div><div class="sb" id="r-lots-sub"></div></div>
+      <div class="metric red">  <div class="lb">Макс. збиток</div><div class="vl" id="r-loss">—</div><div class="sb" id="r-loss-sub"></div></div>
+      <div class="metric green"><div class="lb">Потенц. профіт</div><div class="vl" id="r-profit">—</div><div class="sb" id="r-profit-sub"></div></div>
+      <div class="metric blue"> <div class="lb">R:R</div><div class="vl" id="r-rr">—</div><div class="sb">профіт / збиток</div></div>
+      <div class="metric">      <div class="lb">Ціна стоп-лосу</div><div class="vl" id="r-sl">—</div><div class="sb" id="r-sl-sub"></div></div>
+      <div class="metric">      <div class="lb">Ризик від балансу</div><div class="vl" id="r-pct">—</div><div class="sb">рекомендовано ≤2%</div></div>
+    </div>
+    <div class="warn danger" id="w1">⚠️ Ризик перевищує 5% балансу — дуже небезпечно</div>
+    <div class="warn caution" id="w2">⚠️ Ризик перевищує 2% балансу</div>
+  </div>
+
+  <div class="footer">AMarkets MT4 · Специфікації станом на 23.06.2026 · Forex пари: $10/піп для прямих, ~$7/піп для перехресних</div>
+</div>
+
+
+
+  <hr style="border:none;border-top:0.5px solid #30363d;margin:32px 0">
+  <h2 style="font-size:16px;font-weight:500;color:#e6edf3;margin-bottom:16px">Розрахунок витрат</h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:16px;align-items:start">
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <div class="card">
+        <div class="sec">Параметри позиції</div>
+        <div style="display:flex;gap:16px;align-items:center;font-size:13px">
+          <span style="color:#7d8590">Символ:</span>
+          <span id="c-sym-display" style="font-weight:500;color:#e6edf3">EURUSD</span>
+          <span style="color:#7d8590;margin-left:8px">Напрямок:</span>
+          <span id="c-dir-display" style="font-weight:500;color:#e6edf3">Buy (Long)</span>
+          <span style="color:#7d8590;margin-left:8px">Лоти:</span>
+          <span id="c-lots-display" style="font-weight:500;color:#e6edf3">1.00</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec">Спред</div>
+        <div class="grid2">
+          <div class="field">
+            <label>Ask</label>
+            <input type="number" id="c-ask" step="0.00001" placeholder="1.13850" oninput="calcSpread()">
+          </div>
+          <div class="field">
+            <label>Bid</label>
+            <input type="number" id="c-bid" step="0.00001" placeholder="1.13840" oninput="calcSpread()">
+          </div>
+        </div>
+        <div id="cc-spread-info" style="margin-top:8px;font-size:12px;color:#7d8590;min-height:16px"></div>
+        <input type="hidden" id="c-spread" value="0">
+      </div>
+
+      <div class="card">
+        <div class="sec">Свопи (з специфікації MT4)</div>
+        <div class="grid2">
+          <div class="field">
+            <label>Своп Long (пунктів/ніч)</label>
+            <input type="number" id="c-swapL" value="-7" step="0.1" oninput="calcCosts()">
+          </div>
+          <div class="field">
+            <label>Своп Short (пунктів/ніч)</label>
+            <input type="number" id="c-swapS" value="-3" step="0.1" oninput="calcCosts()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec">Дати позиції</div>
+        <div class="grid2">
+          <div class="field">
+            <label>Відкриття</label>
+            <input type="date" id="c-date-open" oninput="calcDates()">
+          </div>
+          <div class="field">
+            <label>Закриття (план)</label>
+            <input type="date" id="c-date-close" oninput="calcDates()">
+          </div>
+        </div>
+        <div id="cc-dates-info" style="margin-top:8px;font-size:12px;color:#7d8590;min-height:16px"></div>
+        <input type="hidden" id="c-nights" value="1">
+        <input type="hidden" id="c-weekend" value="0">
+      </div>
+
+      <div class="card">
+        <div class="sec">Витрати</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+            <span style="color:#7d8590">Спред відкриття <span id="cc-spread-pips" style="font-size:11px"></span></span>
+            <span id="cc-spread-cost" style="font-weight:500;color:#f85149">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+            <span style="color:#7d8590">Комісія ECN <span id="cc-comm-rt" style="font-size:11px;color:#555"></span></span>
+            <span id="cc-comm" style="font-weight:500;color:#f85149">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid #21262d;font-size:13px">
+            <span style="color:#7d8590">Своп <span id="cc-swap-label" style="font-size:11px"></span></span>
+            <span id="cc-swap" style="font-weight:500">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:14px">
+            <span style="font-weight:500;color:#e6edf3">Загальні витрати</span>
+            <span id="cc-total" style="font-weight:500;font-size:18px;color:#f85149">—</span>
+          </div>
+        </div>
+        <div style="border-top:0.5px solid #21262d;padding-top:10px;margin-top:2px;text-align:center">
+          <div id="cc-breakeven" style="font-size:22px;font-weight:500;color:#e6edf3">—</div>
+          <div id="cc-breakeven-sub" style="font-size:11px;color:#7d8590;margin-top:2px">піп · $ щоб покрити витрати</div>
+        </div>
+        <div id="cc-warn-weekend" style="display:none;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:10px;background:rgba(248,81,73,.12);color:#f85149;border:1px solid rgba(248,81,73,.3)">
+          Потрійний своп потрапляє в діапазон — врахований автоматично
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card" style="position:sticky;top:12px">
+      <div class="sec">Свопи — всі інструменти · ECN · 1 лот</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
+        <colgroup>
+          <col style="width:36%"><col style="width:24%"><col style="width:24%"><col style="width:16%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
+            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
+            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
+            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
+          </tr>
+        </thead>
+        <tbody id="cc-swap-table"></tbody>
+      </table>
+      <div style="font-size:10px;color:#7d8590;margin-top:8px">Оновлено 27.06.2026 · AMarkets ECN</div>
+    </div>
+
+  </div>
+
+
+
+<script>
+const SPECS = {
+  // pipVal = cost of pip per 1 lot (з калькулятора AMarkets)
+  // swapLval/swapSval = $ за 1 лот/ніч (з калькулятора AMarkets, ECN, 27.06.2026)
+  EURUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-10.00, swapSval:2.00,   note:"100,000 EUR · $10/піп"},
+  GBPUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-4.00,  swapSval:-5.00,  note:"100,000 GBP · $10/піп"},
+  AUDUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-3.00,  swapSval:-5.00,  note:"100,000 AUD · $10/піп"},
+  NZDUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-5.00,  swapSval:0.00,   note:"100,000 NZD · $10/піп"},
+  USDCAD:{digits:5,pipSize:0.0001, pipVal:7,   type:"Forex",commRT:5, swapLval:2.00,   swapSval:-7.00,  note:"100,000 USD · ~$7/піп"},
+  USDCHF:{digits:5,pipSize:0.0001, pipVal:12,  type:"Forex",commRT:5, swapLval:7.00,   swapSval:-19.00, note:"100,000 USD · ~$12/піп"},
+  USDJPY:{digits:3,pipSize:0.01,   pipVal:6,   type:"Forex",commRT:5, swapLval:6.00,   swapSval:-11.00, note:"100,000 USD · ~$6/піп"},
+  XAUUSD:{digits:2,pipSize:0.01,   pipVal:1,   type:"CFD",  commRT:7, swapLval:-66.00, swapSval:34.00,  note:"100 oz · $1/pt"},
+  XAGUSD:{digits:3,pipSize:0.001,  pipVal:5,   type:"CFD",  commRT:7, swapLval:-195.00,swapSval:21.00,  note:"5,000 oz · $5/pt"},
+  WTI:   {digits:2,pipSize:0.01,   pipVal:10,  type:"CFD",  commRT:5, swapLval:-4.00,  swapSval:-140.00,note:"1,000 bbl · $10/pt"},
+  NGAS:  {digits:3,pipSize:0.001,  pipVal:30,  type:"CFD",  commRT:5, swapLval:-183.00,swapSval:-180.00,note:"30,000 MMBtu · $30/pt"},
+  SP500: {digits:1,pipSize:0.1,    pipVal:1,   type:"CFD",  commRT:5, swapLval:-1.00,  swapSval:0.00,   note:"×1 · $1/pt"},
+};
+const DEFS={
+  EURUSD:{e:"1.13500",t:"1.15700",sl:50},GBPUSD:{e:"1.31400",t:"1.33500",sl:50},
+  AUDUSD:{e:"0.69425",t:"0.71570",sl:50},NZDUSD:{e:"0.56700",t:"0.58500",sl:50},
+  USDCAD:{e:"1.41500",t:"1.39700",sl:50},USDCHF:{e:"0.81250",t:"0.79500",sl:50},
+  USDJPY:{e:"161.500",t:"162.670",sl:50},
+  XAUUSD:{e:"4219.52",t:"4276.09",sl:500},XAGUSD:{e:"62.536",t:"59.500",sl:500},
+  WTI:{e:"77.00",t:"70.00",sl:500},NGAS:{e:"3.140",t:"3.500",sl:100},
+  SP500:{e:"7300.0",t:"7800.0",sl:500},
+};
+function onSym(){
+  const sym=document.getElementById("sym").value;
+  const s=SPECS[sym],d=DEFS[sym]||{};
+  document.getElementById("spec-info").innerHTML=
+    "<strong>"+s.type+"</strong> · Маржа: USD<br>"+s.note;
+  const step={1:"0.1",2:"0.01",3:"0.001",5:"0.00001"}[s.digits]||"0.00001";
+  document.getElementById("entry").step=step;
+  document.getElementById("tp").step=step;
+  if(d.e)document.getElementById("entry").value=d.e;
+  if(d.t)document.getElementById("tp").value=d.t;
+  if(d.sl)document.getElementById("slpips").value=d.sl;
+  calc();
+}
+function calc(){
+  const sym=document.getElementById("sym").value;
+  const s=SPECS[sym];
+  const maxloss=parseFloat(document.getElementById("maxloss").value)||500;
+  const slpips=parseFloat(document.getElementById("slpips").value)||50;
+  const entry=parseFloat(document.getElementById("entry").value)||0;
+  const tp=parseFloat(document.getElementById("tp").value)||0;
+  const dir=document.getElementById("dir").value;
+  const bal=parseFloat(document.getElementById("bal").value)||5000;
+  const pv=s.pipVal, ps=s.pipSize, dig=s.digits;
+  const lossPerLot=slpips*pv;
+  const lots=lossPerLot>0?maxloss/lossPerLot:0;
+  const lotsR=Math.round(lots*100)/100;
+  const tpPips=tp&&entry?Math.abs(tp-entry)/ps:0;
+  const profit=Math.round(lotsR*tpPips*pv);
+  const loss=Math.round(lotsR*lossPerLot);
+  const rr=loss>0?(profit/loss).toFixed(2):"—";
+  const pct=(loss/bal*100).toFixed(1);
+  const fmt={1:1,2:2,3:3,5:5}[dig]||5;
+  const slPrice=dir==="buy"?(entry-slpips*ps).toFixed(fmt):(entry+slpips*ps).toFixed(fmt);
+  document.getElementById("r-lots").textContent=lotsR.toFixed(2);
+  document.getElementById("r-lots-sub").textContent=s.note;
+  document.getElementById("r-loss").textContent="$"+loss;
+  document.getElementById("r-loss-sub").textContent=slpips+" пунктів × $"+pv+" × "+lotsR.toFixed(2);
+  document.getElementById("r-profit").textContent="$"+profit;
+  document.getElementById("r-profit-sub").textContent=Math.round(tpPips)+" пунктів до TP";
+  document.getElementById("r-rr").textContent=rr;
+  document.getElementById("r-sl").textContent=slPrice;
+  document.getElementById("r-sl-sub").textContent=dir==="buy"?"Entry − SL пунктів":"Entry + SL пунктів";
+  document.getElementById("r-pct").textContent=pct+"%";
+  document.getElementById("w1").style.display=parseFloat(pct)>5?"block":"none";
+  document.getElementById("w2").style.display=(parseFloat(pct)>2&&parseFloat(pct)<=5)?"block":"none";
+}
+onSym();
+
+  // Таблиця свопів
+  function renderSwapTable() {
+    const fmtS = v => {
+      const abs = Math.abs(Math.round(v));
+      return v >= 0
+        ? `<span style="color:#3fb950">+$${abs}</span>`
+        : `<span style="color:#f85149">-$${abs}</span>`;
+    };
+    const rows = Object.entries(SPECS).map(([sym, s]) => {
+      const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
+        ? "<span style='color:#484f58'>Пт</span>"
+        : "<span style='color:#484f58'>Ср</span>";
+      const td = "padding:4px 6px;border-bottom:0.5px solid #21262d";
+      return `<tr>
+        <td style="${td};font-weight:500;font-size:12px">${sym}</td>
+        <td style="${td};text-align:right;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
+        <td style="${td};text-align:right;font-variant-numeric:tabular-nums">${fmtS(s.swapSval)}</td>
+        <td style="${td};text-align:right;font-size:10px">${triDay}</td>
+      </tr>`;
+    }).join("");
+    document.getElementById("cc-swap-table").innerHTML = rows;
+  }
+
+  function calcSpread() {
+    const sym  = document.getElementById("sym").value;
+    const s    = SPECS[sym];
+    const ask  = parseFloat(document.getElementById("c-ask").value);
+    const bid  = parseFloat(document.getElementById("c-bid").value);
+    if (!ask || !bid || ask <= bid) {
+      document.getElementById("cc-spread-info").textContent = "";
+      document.getElementById("c-spread").value = 0;
+      calcCosts(); return;
+    }
+    const digits  = s ? s.digits : 5;
+    const pipSize = digits <= 2 ? Math.pow(10,-(digits)) : (digits===3 ? 0.01 : 0.0001);
+    const pv      = s ? s.pipVal : 10;
+    const lots    = parseFloat(document.getElementById("c-lots-display").textContent) || 1;
+    const spreadPips = (ask - bid) / pipSize;
+    const spreadUSD  = spreadPips * pv * lots;
+    document.getElementById("c-spread").value = spreadPips.toFixed(1);
+    document.getElementById("cc-spread-info").textContent = `Спред: ${spreadPips.toFixed(1)} піп · $${spreadUSD.toFixed(2)} на ${lots} лот(ів)`;
+    calcCosts();
+  }
+
+  function calcDates() {
+    const sym      = document.getElementById("sym").value;
+    const s        = SPECS[sym];
+    const isCFD    = s && s.type === "CFD";
+    const tripleDay= isCFD ? 5 : 3;
+    const dOpen    = document.getElementById("c-date-open").value;
+    const dClose   = document.getElementById("c-date-close").value;
+    const infoEl   = document.getElementById("cc-dates-info");
+    const warnEl   = document.getElementById("cc-warn-weekend");
+    if (!dOpen || !dClose) {
+      infoEl.textContent = "";
+      document.getElementById("c-nights").value = 0;
+      document.getElementById("c-weekend").value = 0;
+      calcCosts(); return;
+    }
+    const open = new Date(dOpen), close = new Date(dClose);
+    if (close <= open) { infoEl.textContent = "Дата закриття має бути пізніше відкриття"; return; }
+    let nights = 0, tripleCount = 0;
+    const cur = new Date(open);
+    while (cur < close) {
+      const dow = cur.getDay();
+      if (dow !== 0 && dow !== 6) { nights++; if (dow === tripleDay) tripleCount++; }
+      cur.setDate(cur.getDate()+1);
+    }
+    const totalNights = nights + tripleCount*2;
+    document.getElementById("c-nights").value  = nights;
+    document.getElementById("c-weekend").value = tripleCount;
+    const dayName = isCFD ? "пятницю" : "середу";
+    infoEl.innerHTML = tripleCount > 0
+      ? `${nights} ніч · потрійний своп (${dayName}) ×${tripleCount} → разом ${totalNights} ночей`
+      : `${nights} ніч(ей)`;
+    warnEl.style.display = tripleCount > 0 ? "block" : "none";
+    calcCosts();
+  }
+
+  function calcCosts() {
+    const sym    = document.getElementById("sym").value;
+    const dir    = document.getElementById("dir").value;
+    const lots   = parseFloat(document.getElementById("c-lots-display").textContent) || 1;
+    const spreadPips  = parseFloat(document.getElementById("c-spread").value) || 0;
+    const nights      = parseInt(document.getElementById("c-nights").value) || 0;
+    const tripleCount = parseInt(document.getElementById("c-weekend").value) || 0;
+    const s      = SPECS[sym];
+    const pv     = s ? s.pipVal : 10;
+    const commRT = s ? s.commRT : 5;
+    const swapLval = s ? s.swapLval : 0;
+    const swapSval = s ? s.swapSval : 0;
+
+    const spreadCost  = spreadPips * pv * lots;
+    const commTotal   = commRT * lots;
+    const totalNights = nights + tripleCount*2;
+    const swapNight   = (dir==="buy" ? swapLval : swapSval) * lots;
+    const swapTotal   = swapNight * totalNights;
+    const totalCost   = spreadCost + commTotal + swapTotal;
+
+    const fmtNeg = v => "-$" + Math.abs(v).toFixed(2);
+    const fmt    = v => (v>=0?"+$":"-$") + Math.abs(v).toFixed(2);
+    const col    = v => v>=0 ? "#3fb950" : "#f85149";
+
+    // totalCost = всі витрати включно зі спредом
+    // beP = беззбитковий рух без спреду (комісія + своп) в піпах
+    // spreadPips вже "в мінусі" з відкриття, тому додаємо окремо
+    const totalAbs = Math.abs(totalCost);
+    const beP = pv > 0 ? (Math.abs(commTotal + swapTotal) / (pv * lots)) : 0;
+    const bePwithSpread = beP + spreadPips;
+
+    document.getElementById("cc-spread-cost").textContent   = spreadPips>0 ? fmtNeg(spreadCost) : "—";
+    document.getElementById("cc-spread-pips").textContent   = spreadPips>0 ? `(${spreadPips.toFixed(1)} піп)` : "";
+    document.getElementById("cc-comm").textContent          = fmtNeg(commTotal);
+    document.getElementById("cc-comm-rt").textContent       = "$"+commRT+"/лот";
+    document.getElementById("cc-swap").textContent          = totalNights>0 ? fmt(swapTotal) : "—";
+    document.getElementById("cc-swap").style.color          = col(swapTotal);
+    document.getElementById("cc-swap-label").textContent    = totalNights>0 ? `×${totalNights} ніч`+(tripleCount>0?" (з потрійним)":"") : "";
+    document.getElementById("cc-total").textContent         = fmtNeg(totalAbs);
+    document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${totalAbs.toFixed(2)}` : "—";
+    const beSub = spreadPips>0
+      ? `спред ${spreadPips.toFixed(1)} + комісія/своп ${beP.toFixed(1)} піп`
+      : `піп · $ щоб покрити комісію та своп`;
+    document.getElementById("cc-breakeven-sub").textContent = beSub;
+  }
+
+  function syncToCosts() {
+    const sym  = document.getElementById("sym").value;
+    const lots = document.getElementById("r-lots").textContent || "1.00";
+    const dir  = document.getElementById("dir").value;
+    document.getElementById("c-sym-display").textContent  = sym;
+    document.getElementById("c-dir-display").textContent  = dir === "buy" ? "Buy (Long)" : "Sell (Short)";
+    document.getElementById("c-lots-display").textContent = lots;
+    const swaps = {
+      EURUSD:{L:-10.3,S:2.3},  GBPUSD:{L:-4.9,S:-4.1},
+      AUDUSD:{L:-3.2, S:-4.6}, NZDUSD:{L:-5.2,S:0.3},
+      USDCAD:{L:2.2,  S:-10},  USDCHF:{L:5.7, S:-15.3},
+      USDJPY:{L:9.3,  S:-17.9},XAUUSD:{L:-65.5,S:34.2},
+      XAGUSD:{L:-39,  S:4.3},  WTI:   {L:-0.4,S:-14},
+      NGAS:  {L:-6.1, S:-6},   SP500: {L:-12.9,S:2.1}
+    };
+    if(swaps[sym]){
+      document.getElementById("c-swapL").value = swaps[sym].L;
+      document.getElementById("c-swapS").value = swaps[sym].S;
+    }
+    calcCosts();
+  }
+
+  const _origCalc = calc;
+  calc = function(){ _origCalc(); syncToCosts(); };
+  renderSwapTable();
+  syncToCosts();
+</script>
+</body>
+</html>
