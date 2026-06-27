@@ -217,10 +217,10 @@ optgroup { color: #7d8590; font-size: 11px; }
         </colgroup>
         <thead>
           <tr>
-            <th style="text-align:left;padding:2px 2px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
-            <th style="text-align:right;padding:2px 2px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
-            <th style="text-align:right;padding:2px 2px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
-            <th style="text-align:right;padding:2px 2px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
+            <th style="text-align:left;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
+            <th style="text-align:right;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
+            <th style="text-align:right;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
+            <th style="text-align:right;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
           </tr>
         </thead>
         <tbody id="cc-swap-table"></tbody>
@@ -318,7 +318,7 @@ onSym();
       const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
         ? "<span style='color:#484f58'>Пт</span>"
         : "<span style='color:#484f58'>Ср</span>";
-      const td = "padding:0 2px;border-bottom:0.5px solid #21262d";
+      const td = "padding:0 1px;border-bottom:0.5px solid #21262d";
       return `<tr>
         <td style="${td};font-weight:500;font-size:18px">${sym}</td>
         <td style="${td};text-align:right;font-size:18px;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
