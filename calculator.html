@@ -121,22 +121,22 @@ optgroup { color: #7d8590; font-size: 11px; }
   <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start">
 
     <div class="card" style="position:sticky;top:12px">
-      <div class="sec">Свопи — всі інструменти · ECN · 1 лот</div>
+      <div class="sec" style="margin-bottom:8px">Свопи · ECN · 1 лот</div>
       <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
         <colgroup>
-          <col style="width:36%"><col style="width:24%"><col style="width:24%"><col style="width:16%">
+          <col style="width:40%"><col style="width:22%"><col style="width:22%"><col style="width:16%">
         </colgroup>
         <thead>
-          <tr>
-            <th style="text-align:left;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
-            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
-            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
-            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
+          <tr style="background:#0d1117">
+            <th style="text-align:left;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
+            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
+            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
+            <th style="text-align:right;padding:2px 5px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
           </tr>
         </thead>
         <tbody id="cc-swap-table"></tbody>
       </table>
-      <div style="font-size:10px;color:#7d8590;margin-top:8px">Оновлено 27.06.2026 · AMarkets ECN</div>
+      <div style="font-size:10px;color:#484f58;margin-top:6px">27.06.2026 · AMarkets ECN</div>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:12px">
@@ -337,7 +337,7 @@ onSym();
     const s    = SPECS[sym];
     const ask  = parseFloat(document.getElementById("c-ask").value);
     const bid  = parseFloat(document.getElementById("c-bid").value);
-    if (!ask || !bid || ask <= bid) {
+    if (!ask || !bid) {
       document.getElementById("cc-spread-info").textContent = "";
       document.getElementById("c-spread").value = 0;
       calcCosts(); return;
@@ -346,7 +346,7 @@ onSym();
     const pipSize = digits <= 2 ? Math.pow(10,-(digits)) : (digits===3 ? 0.01 : 0.0001);
     const pv      = s ? s.pipVal : 10;
     const lots    = parseFloat(document.getElementById("c-lots-display").textContent) || 1;
-    const spreadPips = (ask - bid) / pipSize;
+    const spreadPips = Math.abs(ask - bid) / pipSize;
     const spreadUSD  = spreadPips * pv * lots;
     document.getElementById("c-spread").value = spreadPips.toFixed(1);
     document.getElementById("cc-spread-info").textContent = `Спред: ${spreadPips.toFixed(1)} піп · $${spreadUSD.toFixed(2)} на ${lots} лот(ів)`;
@@ -461,4 +461,4 @@ onSym();
 </script>
 </body>
 </html>
-<!-- built 1782550841 -->
+<!-- built 1782551286 -->
