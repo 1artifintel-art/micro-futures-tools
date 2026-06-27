@@ -211,13 +211,16 @@ optgroup { color: #7d8590; font-size: 11px; }
 
     <div class="card" style="position:sticky;top:12px">
       <div class="sec">Свопи — всі інструменти · ECN · 1 лот</div>
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
+        <colgroup>
+          <col style="width:36%"><col style="width:24%"><col style="width:24%"><col style="width:16%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="text-align:left;padding:4px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590;letter-spacing:.05em">Символ</th>
-            <th style="text-align:right;padding:4px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590;letter-spacing:.05em">Long $/ніч</th>
-            <th style="text-align:right;padding:4px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590;letter-spacing:.05em">Short $/ніч</th>
-            <th style="text-align:right;padding:4px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590;letter-spacing:.05em">3× своп</th>
+            <th style="text-align:left;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
+            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
+            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
+            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
           </tr>
         </thead>
         <tbody id="cc-swap-table"></tbody>
@@ -305,11 +308,23 @@ onSym();
 
   // Таблиця свопів
   function renderSwapTable() {
+    const fmtS = v => {
+      const abs = Math.abs(Math.round(v));
+      return v >= 0
+        ? `<span style="color:#3fb950">+$${abs}</span>`
+        : `<span style="color:#f85149">-$${abs}</span>`;
+    };
     const rows = Object.entries(SPECS).map(([sym, s]) => {
-      const fL = s.swapLval >= 0 ? `<span style="color:#3fb950">+$${s.swapLval.toFixed(2)}</span>` : `<span style="color:#f85149">-$${Math.abs(s.swapLval).toFixed(2)}</span>`;
-      const fS = s.swapSval >= 0 ? `<span style="color:#3fb950">+$${s.swapSval.toFixed(2)}</span>` : `<span style="color:#f85149">-$${Math.abs(s.swapSval).toFixed(2)}</span>`;
-      const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500") ? "<span style='color:#7d8590'>Пт</span>" : "Ср";
-      return `<tr><td style="padding:5px 6px;border-bottom:0.5px solid #21262d;font-weight:500">${sym}</td><td style="padding:5px 6px;border-bottom:0.5px solid #21262d;text-align:right">${fL}</td><td style="padding:5px 6px;border-bottom:0.5px solid #21262d;text-align:right">${fS}</td><td style="padding:5px 6px;border-bottom:0.5px solid #21262d;text-align:right;font-size:11px">${triDay}</td></tr>`;
+      const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
+        ? "<span style='color:#484f58'>Пт</span>"
+        : "<span style='color:#484f58'>Ср</span>";
+      const td = "padding:4px 6px;border-bottom:0.5px solid #21262d";
+      return `<tr>
+        <td style="${td};font-weight:500;font-size:12px">${sym}</td>
+        <td style="${td};text-align:right;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
+        <td style="${td};text-align:right;font-variant-numeric:tabular-nums">${fmtS(s.swapSval)}</td>
+        <td style="${td};text-align:right;font-size:10px">${triDay}</td>
+      </tr>`;
     }).join("");
     document.getElementById("cc-swap-table").innerHTML = rows;
   }
@@ -394,8 +409,12 @@ onSym();
     const fmt    = v => (v>=0?"+$":"-$") + Math.abs(v).toFixed(2);
     const col    = v => v>=0 ? "#3fb950" : "#f85149";
 
-    const beUSD  = Math.abs(totalCost);
-    const beP    = pv > 0 ? (Math.abs(commTotal+swapTotal)/(pv*lots)) : 0;
+    // totalCost = всі витрати включно зі спредом
+    // beP = беззбитковий рух без спреду (комісія + своп) в піпах
+    // spreadPips вже "в мінусі" з відкриття, тому додаємо окремо
+    const totalAbs = Math.abs(totalCost);
+    const beP = pv > 0 ? (Math.abs(commTotal + swapTotal) / (pv * lots)) : 0;
+    const bePwithSpread = beP + spreadPips;
 
     document.getElementById("cc-spread-cost").textContent   = spreadPips>0 ? fmtNeg(spreadCost) : "—";
     document.getElementById("cc-spread-pips").textContent   = spreadPips>0 ? `(${spreadPips.toFixed(1)} піп)` : "";
@@ -404,9 +423,11 @@ onSym();
     document.getElementById("cc-swap").textContent          = totalNights>0 ? fmt(swapTotal) : "—";
     document.getElementById("cc-swap").style.color          = col(swapTotal);
     document.getElementById("cc-swap-label").textContent    = totalNights>0 ? `×${totalNights} ніч`+(tripleCount>0?" (з потрійним)":"") : "";
-    document.getElementById("cc-total").textContent         = fmtNeg(beUSD);
-    document.getElementById("cc-breakeven").textContent     = beP>0 ? `${beP.toFixed(1)} піп · $${beUSD.toFixed(2)}` : "—";
-    const beSub = spreadPips>0 ? `+ спред ${spreadPips.toFixed(1)} піп = ${(beP+spreadPips).toFixed(1)} піп від ціни відкриття` : "піп · $ щоб покрити комісію та своп";
+    document.getElementById("cc-total").textContent         = fmtNeg(totalAbs);
+    document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${totalAbs.toFixed(2)}` : "—";
+    const beSub = spreadPips>0
+      ? `спред ${spreadPips.toFixed(1)} + комісія/своп ${beP.toFixed(1)} піп`
+      : `піп · $ щоб покрити комісію та своп`;
     document.getElementById("cc-breakeven-sub").textContent = beSub;
   }
 
