@@ -213,14 +213,14 @@ optgroup { color: #7d8590; font-size: 11px; }
       <div class="sec" style="margin-bottom:6px">Свопи · ECN · 1 лот</div>
       <table style="width:100%;border-collapse:collapse;table-layout:fixed">
         <colgroup>
-          <col style="width:54%"><col style="width:16%"><col style="width:16%"><col style="width:14%">
+          <col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%">
         </colgroup>
         <thead>
           <tr>
-            <th style="text-align:left;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
-            <th style="text-align:right;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
-            <th style="text-align:right;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
-            <th style="text-align:right;padding:2px 1px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
+            <th style="text-align:left;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
+            <th style="text-align:right;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
+            <th style="text-align:right;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
+            <th style="text-align:right;padding:2px 0;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
           </tr>
         </thead>
         <tbody id="cc-swap-table"></tbody>
@@ -318,7 +318,7 @@ onSym();
       const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
         ? "<span style='color:#484f58'>Пт</span>"
         : "<span style='color:#484f58'>Ср</span>";
-      const td = "padding:0 1px;border-bottom:0.5px solid #21262d";
+      const td = "padding:0;border-bottom:0.5px solid #21262d";
       return `<tr>
         <td style="${td};font-weight:500;font-size:18px">${sym}</td>
         <td style="${td};text-align:right;font-size:18px;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
