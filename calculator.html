@@ -210,22 +210,22 @@ optgroup { color: #7d8590; font-size: 11px; }
     </div>
 
     <div class="card" style="position:sticky;top:12px">
-      <div class="sec">Свопи — всі інструменти · ECN · 1 лот</div>
-      <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
+      <div class="sec" style="margin-bottom:6px">Свопи · ECN · 1 лот</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed">
         <colgroup>
-          <col style="width:36%"><col style="width:24%"><col style="width:24%"><col style="width:16%">
+          <col style="width:38%"><col style="width:22%"><col style="width:22%"><col style="width:18%">
         </colgroup>
         <thead>
           <tr>
-            <th style="text-align:left;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Символ</th>
-            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Long</th>
-            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">Short</th>
-            <th style="text-align:right;padding:3px 6px;border-bottom:0.5px solid #21262d;font-size:10px;font-weight:500;color:#7d8590">3×</th>
+            <th style="text-align:left;padding:2px 4px;border-bottom:0.5px solid #21262d;font-size:9px;font-weight:500;color:#7d8590">Символ</th>
+            <th style="text-align:right;padding:2px 4px;border-bottom:0.5px solid #21262d;font-size:9px;font-weight:500;color:#7d8590">Long</th>
+            <th style="text-align:right;padding:2px 4px;border-bottom:0.5px solid #21262d;font-size:9px;font-weight:500;color:#7d8590">Short</th>
+            <th style="text-align:right;padding:2px 4px;border-bottom:0.5px solid #21262d;font-size:9px;font-weight:500;color:#7d8590">3×</th>
           </tr>
         </thead>
         <tbody id="cc-swap-table"></tbody>
       </table>
-      <div style="font-size:10px;color:#7d8590;margin-top:8px">Оновлено 27.06.2026 · AMarkets ECN</div>
+      <div style="font-size:9px;color:#484f58;margin-top:4px">27.06.2026 · AMarkets ECN</div>
     </div>
 
   </div>
@@ -318,7 +318,7 @@ onSym();
       const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
         ? "<span style='color:#484f58'>Пт</span>"
         : "<span style='color:#484f58'>Ср</span>";
-      const td = "padding:4px 6px;border-bottom:0.5px solid #21262d";
+      const td = "padding:2px 4px;border-bottom:0.5px solid #21262d";
       return `<tr>
         <td style="${td};font-weight:500;font-size:12px">${sym}</td>
         <td style="${td};text-align:right;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
