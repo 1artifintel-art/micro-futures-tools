@@ -131,19 +131,7 @@ optgroup { color: #7d8590; font-size: 11px; }
         </div>
       </div>
 
-      <div class="card">
-        <div class="sec">Свопи (з специфікації MT4)</div>
-        <div class="grid2">
-          <div class="field">
-            <label>Своп Long (пунктів/ніч)</label>
-            <input type="number" id="c-swapL" value="-7" step="0.1" oninput="calcCosts()">
-          </div>
-          <div class="field">
-            <label>Своп Short (пунктів/ніч)</label>
-            <input type="number" id="c-swapS" value="-3" step="0.1" oninput="calcCosts()">
-          </div>
-        </div>
-      </div>
+
 
       <div class="card">
         <div class="sec">Дати позиції</div>
@@ -236,6 +224,15 @@ optgroup { color: #7d8590; font-size: 11px; }
   </div>
 <script>
 const SPECS = {
+  // Пункти свопів з MT4 (редаговані користувачем)
+  const SWAP_PTS = {
+    EURUSD:{L:-10.3,S:2.3},  GBPUSD:{L:-4.9,S:-4.1},
+    AUDUSD:{L:-3.2, S:-4.6}, NZDUSD:{L:-5.2,S:0.3},
+    USDCAD:{L:2.2,  S:-10},  USDCHF:{L:5.7, S:-15.3},
+    USDJPY:{L:9.3,  S:-17.9},XAUUSD:{L:-65.5,S:34.2},
+    XAGUSD:{L:-39,  S:4.3},  WTI:   {L:-0.4,S:-14},
+    NGAS:  {L:-6.1, S:-6},   SP500: {L:-12.9,S:2.1}
+  };
   // pipVal = cost of pip per 1 lot (з калькулятора AMarkets)
   // swapLval/swapSval = $ за 1 лот/ніч (з калькулятора AMarkets, ECN, 27.06.2026)
   EURUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-10.00, swapSval:2.00,   note:"100,000 EUR · $10/піп"},
@@ -309,23 +306,72 @@ function calc(){
 onSym();
 
   // Таблиця свопів
+  function fmtSwapUSD(pts, sym) {
+    const s = SPECS[sym];
+    if (!s) return "$0";
+    const usd = pts * (s.swapLval / (SWAP_PTS[sym] ? SWAP_PTS[sym].L : pts || 1));
+    return usd;
+  }
+
+  function swapPtsToUSD(sym, pts, dir) {
+    const s = SPECS[sym];
+    if (!s) return 0;
+    const basePts = dir === "L" ? SWAP_PTS[sym].L : SWAP_PTS[sym].S;
+    const baseUSD = dir === "L" ? s.swapLval : s.swapSval;
+    if (!basePts) return 0;
+    return (pts / basePts) * baseUSD;
+  }
+
   function renderSwapTable() {
-    const fmtS = v => {
-      const abs = Math.abs(Math.round(v));
-      return v >= 0
-        ? `<span style="color:#3fb950">+$${abs}</span>`
-        : `<span style="color:#f85149">-$${abs}</span>`;
-    };
     const rows = Object.entries(SPECS).map(([sym, s]) => {
       const tri = (sym==="WTI"||sym==="NGAS"||sym==="SP500") ? "Пт" : "Ср";
+      const ptsL = SWAP_PTS[sym] ? SWAP_PTS[sym].L : 0;
+      const ptsS = SWAP_PTS[sym] ? SWAP_PTS[sym].S : 0;
+      const usdL = s.swapLval;
+      const usdS = s.swapSval;
+      const colL = usdL >= 0 ? "#3fb950" : "#f85149";
+      const colS = usdS >= 0 ? "#3fb950" : "#f85149";
+      const fmtU = (v) => (v >= 0 ? "+$" : "-$") + Math.abs(Math.round(v));
+      const bd = "border-bottom:0.5px solid #21262d";
       return `<tr>
-        <td style="padding:1px 0;border-bottom:0.5px solid #21262d;font-size:18px;font-weight:500;color:#e6edf3;white-space:nowrap">${sym}</td>
-        <td style="padding:1px 4px;border-bottom:0.5px solid #21262d;font-size:18px;text-align:right;font-variant-numeric:tabular-nums;width:55px">${fmtS(s.swapLval)}</td>
-        <td style="padding:1px 4px;border-bottom:0.5px solid #21262d;font-size:18px;text-align:right;font-variant-numeric:tabular-nums;width:55px">${fmtS(s.swapSval)}</td>
-        <td style="padding:1px 0;border-bottom:0.5px solid #21262d;font-size:10px;text-align:right;color:#484f58;width:20px">${tri}</td>
+        <td style="padding:1px 0;${bd};font-size:16px;font-weight:500;color:#e6edf3;white-space:nowrap">${sym}</td>
+        <td style="padding:1px 4px;${bd};text-align:right">
+          <input type="number" value="${ptsL}" step="0.1"
+            style="width:52px;font-size:12px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#7d8590;padding:1px 3px;text-align:right"
+            oninput="onSwapPtsChange('${sym}','L',this.value)">
+          <div style="font-size:14px;font-weight:500;color:${colL}" id="swap-usd-${sym}-L">${fmtU(usdL)}</div>
+        </td>
+        <td style="padding:1px 4px;${bd};text-align:right">
+          <input type="number" value="${ptsS}" step="0.1"
+            style="width:52px;font-size:12px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#7d8590;padding:1px 3px;text-align:right"
+            oninput="onSwapPtsChange('${sym}','S',this.value)">
+          <div style="font-size:14px;font-weight:500;color:${colS}" id="swap-usd-${sym}-S">${fmtU(usdS)}</div>
+        </td>
+        <td style="padding:1px 0;${bd};font-size:10px;text-align:right;color:#484f58;white-space:nowrap">${tri}</td>
       </tr>`;
     }).join("");
     document.getElementById("cc-swap-table").innerHTML = rows;
+  }
+
+  function onSwapPtsChange(sym, dir, ptsStr) {
+    const pts = parseFloat(ptsStr) || 0;
+    const s = SPECS[sym];
+    if (!s) return;
+    // ptVal: скільки $ дає 1 пункт для цього інструменту
+    const basePts = dir === "L" ? SWAP_PTS[sym].L : SWAP_PTS[sym].S;
+    const baseUSD = dir === "L" ? s.swapLval : s.swapSval;
+    const ptVal = basePts !== 0 ? baseUSD / basePts : 0;
+    const newUSD = pts * ptVal;
+    // Оновлюємо SPECS
+    if (dir === "L") { s.swapLval = newUSD; SWAP_PTS[sym].L = pts; }
+    else             { s.swapSval = newUSD; SWAP_PTS[sym].S = pts; }
+    // Оновлюємо відображення $
+    const el = document.getElementById(`swap-usd-${sym}-${dir}`);
+    if (el) {
+      el.textContent = (newUSD >= 0 ? "+$" : "-$") + Math.abs(Math.round(newUSD));
+      el.style.color = newUSD >= 0 ? "#3fb950" : "#f85149";
+    }
+    calcCosts();
   }
 
     function calcSpread() {
@@ -460,18 +506,7 @@ onSym();
     document.getElementById("c-sym-display").textContent  = sym;
     document.getElementById("c-dir-display").textContent  = dir === "buy" ? "Buy (Long)" : "Sell (Short)";
     document.getElementById("c-lots-display").textContent = lots;
-    const swaps = {
-      EURUSD:{L:-10.3,S:2.3},  GBPUSD:{L:-4.9,S:-4.1},
-      AUDUSD:{L:-3.2, S:-4.6}, NZDUSD:{L:-5.2,S:0.3},
-      USDCAD:{L:2.2,  S:-10},  USDCHF:{L:5.7, S:-15.3},
-      USDJPY:{L:9.3,  S:-17.9},XAUUSD:{L:-65.5,S:34.2},
-      XAGUSD:{L:-39,  S:4.3},  WTI:   {L:-0.4,S:-14},
-      NGAS:  {L:-6.1, S:-6},   SP500: {L:-12.9,S:2.1}
-    };
-    if(swaps[sym]){
-      document.getElementById("c-swapL").value = swaps[sym].L;
-      document.getElementById("c-swapS").value = swaps[sym].S;
-    }
+
     calcCosts();
   }
 
