@@ -361,8 +361,7 @@ onSym();
     const warnEl   = document.getElementById("cc-warn-weekend");
     if (!dOpen || !dClose) {
       infoEl.textContent = "";
-      document.getElementById("c-nights").value = 0;
-      document.getElementById("c-weekend").value = 0;
+      // не скидаємо — залишаємо поточне значення (default=1)
       calcCosts(); return;
     }
     const open = new Date(dOpen), close = new Date(dClose);
@@ -419,9 +418,9 @@ onSym();
     document.getElementById("cc-spread-pips").textContent   = spreadPips>0 ? `(${spreadPips.toFixed(1)} піп)` : "";
     document.getElementById("cc-comm").textContent          = fmtNeg(commTotal);
     document.getElementById("cc-comm-rt").textContent       = "$"+commRT+"/лот";
-    document.getElementById("cc-swap").textContent          = totalNights>0 ? fmt(swapTotal) : "—";
+    document.getElementById("cc-swap").textContent          = fmt(swapTotal);
     document.getElementById("cc-swap").style.color          = col(swapTotal);
-    document.getElementById("cc-swap-label").textContent    = totalNights>0 ? `×${totalNights} ніч`+(tripleCount>0?" (з потрійним)":"") : "";
+    document.getElementById("cc-swap-label").textContent    = `×${totalNights} ніч`+(tripleCount>0?" (з потрійним)":"");
     document.getElementById("cc-total").textContent         = fmtNeg(totalAbs);
     document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${totalAbs.toFixed(2)}` : "—";
     const beSub = spreadPips>0
