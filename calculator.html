@@ -422,6 +422,7 @@ onSym();
     document.getElementById("cc-swap").style.color          = col(swapTotal);
     document.getElementById("cc-swap-label").textContent    = totalNights>0 ? `×${totalNights} ніч`+(tripleCount>0?" (з потрійним)":"") : "";
     document.getElementById("cc-total").textContent         = fmtNeg(totalAbs);
+    updateBreakevenWithSpread();
     document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${totalAbs.toFixed(2)}` : "—";
     const beSub = spreadPips>0
       ? `спред ${spreadPips.toFixed(1)} + комісія/своп ${beP.toFixed(1)} піп`
