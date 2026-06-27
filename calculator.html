@@ -223,7 +223,6 @@ optgroup { color: #7d8590; font-size: 11px; }
 
   </div>
 <script>
-const SPECS = {
   // Пункти свопів з MT4 (редаговані користувачем)
   const SWAP_PTS = {
     EURUSD:{L:-10.3,S:2.3},  GBPUSD:{L:-4.9,S:-4.1},
@@ -233,6 +232,8 @@ const SPECS = {
     XAGUSD:{L:-39,  S:4.3},  WTI:   {L:-0.4,S:-14},
     NGAS:  {L:-6.1, S:-6},   SP500: {L:-12.9,S:2.1}
   };
+
+const SPECS = {
   // pipVal = cost of pip per 1 lot (з калькулятора AMarkets)
   // swapLval/swapSval = $ за 1 лот/ніч (з калькулятора AMarkets, ECN, 27.06.2026)
   EURUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-10.00, swapSval:2.00,   note:"100,000 EUR · $10/піп"},
