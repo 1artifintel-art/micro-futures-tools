@@ -464,8 +464,9 @@ onSym();
     // beP = беззбитковий рух без спреду (комісія + своп) в піпах
     // spreadPips вже "в мінусі" з відкриття, тому додаємо окремо
     // commTotal завжди витрата, swapTotal може зменшувати витрати якщо позитивний
-    const totalAbs = Math.abs(-commTotal + swapTotal);
-    const beP = pv > 0 ? (Math.abs(commTotal + swapTotal) / (pv * lots)) : 0;
+    // totalCost зі знаком: від'ємне = витрата, позитивне = прибуток від свопу
+    const totalCostSigned = swapTotal - commTotal;
+    const beP = pv > 0 ? (Math.abs(totalCostSigned) / (pv * lots)) : 0;
     const bePwithSpread = beP + spreadPips;
 
     document.getElementById("cc-comm").textContent          = fmtNeg(commTotal);
@@ -473,7 +474,10 @@ onSym();
     document.getElementById("cc-swap").textContent          = totalNights>0 ? fmt(swapTotal) : "—";
     document.getElementById("cc-swap").style.color          = col(swapTotal);
     document.getElementById("cc-swap-label").textContent    = totalNights>0 ? `×${totalNights} ніч`+(tripleCount>0?" (з потрійним)":"") : "";
-    document.getElementById("cc-total").textContent         = fmtNeg(totalAbs);
+    const col = v => v >= 0 ? "#3fb950" : "#f85149";
+    const fmtSigned = v => (v >= 0 ? "+$" : "-$") + Math.abs(v).toFixed(2);
+    document.getElementById("cc-total").textContent         = fmtSigned(totalCostSigned);
+    document.getElementById("cc-total").style.color         = col(totalCostSigned);
     updateBreakevenWithSpread();
     document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${totalAbs.toFixed(2)}` : "—";
     const beSub = spreadPips>0
@@ -497,12 +501,12 @@ onSym();
     const nights = parseInt(document.getElementById("c-nights").value) || 0;
     const triple = parseInt(document.getElementById("c-weekend").value) || 0;
     const swapTotal = swapNight * (nights + triple*2);
-    const totalAbs = Math.abs(commTotal) + Math.abs(swapTotal);
-    const beP = pv > 0 ? (totalAbs / (pv * lots)) : 0;
+    const totalCostSigned = swapTotal - commTotal;
+    const beP = pv > 0 ? (Math.abs(totalCostSigned) / (pv * lots)) : 0;
     const bePwithSpread = beP + spreadPips;
     wrap.style.display = "block";
     document.getElementById("cc-spread-pips-val").textContent = spreadPips.toFixed(1) + " піп";
-    document.getElementById("cc-breakeven-spread").textContent = bePwithSpread.toFixed(1) + " піп · $" + (totalAbs + spreadPips*pv*lots).toFixed(2);
+    document.getElementById("cc-breakeven-spread").textContent = bePwithSpread.toFixed(1) + " піп · $" + (Math.abs(totalCostSigned) + spreadPips*pv*lots).toFixed(2);
   }
 
   function syncToCosts() {
