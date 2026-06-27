@@ -318,7 +318,7 @@ onSym();
       const triDay = (sym==="WTI"||sym==="NGAS"||sym==="SP500")
         ? "<span style='color:#484f58'>Пт</span>"
         : "<span style='color:#484f58'>Ср</span>";
-      const td = "padding:0 3px;border-bottom:0.5px solid #21262d";
+      const td = "padding:0 2px;border-bottom:0.5px solid #21262d";
       return `<tr>
         <td style="${td};font-weight:500;font-size:12px">${sym}</td>
         <td style="${td};text-align:right;font-size:12px;font-variant-numeric:tabular-nums">${fmtS(s.swapLval)}</td>
