@@ -416,8 +416,6 @@ onSym();
     const beP = pv > 0 ? (Math.abs(commTotal + swapTotal) / (pv * lots)) : 0;
     const bePwithSpread = beP + spreadPips;
 
-    document.getElementById("cc-spread-cost").textContent   = spreadPips>0 ? fmtNeg(spreadCost) : "—";
-    document.getElementById("cc-spread-pips").textContent   = spreadPips>0 ? `(${spreadPips.toFixed(1)} піп)` : "";
     document.getElementById("cc-comm").textContent          = fmtNeg(commTotal);
     document.getElementById("cc-comm-rt").textContent       = "$"+commRT+"/лот";
     document.getElementById("cc-swap").textContent          = totalNights>0 ? fmt(swapTotal) : "—";
