@@ -478,7 +478,7 @@ onSym();
     document.getElementById("cc-total").textContent         = (totalCostSigned>=0?"+$":"-$") + Math.abs(totalCostSigned).toFixed(2);
     document.getElementById("cc-total").style.color         = totalCostSigned>=0 ? "#3fb950" : "#f85149";
     updateBreakevenWithSpread();
-    document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${totalAbs.toFixed(2)}` : "—";
+    document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${Math.abs(totalCostSigned).toFixed(2)}` : "—";
     const beSub = spreadPips>0
       ? `спред ${spreadPips.toFixed(1)} + комісія/своп ${beP.toFixed(1)} піп`
       : `піп · $ щоб покрити комісію та своп`;
