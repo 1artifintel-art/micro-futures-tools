@@ -251,12 +251,20 @@ const SPECS = {
   NGAS:  {digits:3,pipSize:0.001,  pipVal:30,  type:"CFD",  commRT:5, swapLval:-183.00,swapSval:-180.00,note:"30,000 MMBtu · $30/pt"},
   SP500: {digits:1,pipSize:0.1,    pipVal:1,   type:"CFD",  commRT:5, swapLval:-1.00,  swapSval:0.00,   note:"×1 · $1/pt"},
 };
-// Фіксовані коефіцієнти $ за 1 пункт (рахуються один раз від дефолтних значень)
-  const PT_VAL = {};
+// Фіксовані коефіцієнти $ за 1 пункт від дефолтних констант
+  const DEFAULT_SWAP_USD = {};
   Object.entries(SPECS).forEach(([sym, s]) => {
+    DEFAULT_SWAP_USD[sym] = { L: s.swapLval, S: s.swapSval };
+  });
+  const DEFAULT_SWAP_PTS = {};
+  Object.entries(SWAP_PTS).forEach(([sym, v]) => {
+    DEFAULT_SWAP_PTS[sym] = { L: v.L, S: v.S };
+  });
+  const PT_VAL = {};
+  Object.keys(SPECS).forEach(sym => {
     PT_VAL[sym] = {
-      L: SWAP_PTS[sym].L !== 0 ? s.swapLval / SWAP_PTS[sym].L : 0,
-      S: SWAP_PTS[sym].S !== 0 ? s.swapSval / SWAP_PTS[sym].S : 0,
+      L: DEFAULT_SWAP_PTS[sym].L !== 0 ? DEFAULT_SWAP_USD[sym].L / DEFAULT_SWAP_PTS[sym].L : 0,
+      S: DEFAULT_SWAP_PTS[sym].S !== 0 ? DEFAULT_SWAP_USD[sym].S / DEFAULT_SWAP_PTS[sym].S : 0,
     };
   });
 
