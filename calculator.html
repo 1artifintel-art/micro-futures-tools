@@ -238,35 +238,20 @@ optgroup { color: #7d8590; font-size: 11px; }
 const SPECS = {
   // pipVal = cost of pip per 1 lot (з калькулятора AMarkets)
   // swapLval/swapSval = $ за 1 лот/ніч (з калькулятора AMarkets, ECN, 27.06.2026)
-  EURUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-10.00, swapSval:2.00,   note:"100,000 EUR · $10/піп"},
-  GBPUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-4.00,  swapSval:-5.00,  note:"100,000 GBP · $10/піп"},
-  AUDUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-3.00,  swapSval:-5.00,  note:"100,000 AUD · $10/піп"},
-  NZDUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, swapLval:-5.00,  swapSval:0.00,   note:"100,000 NZD · $10/піп"},
-  USDCAD:{digits:5,pipSize:0.0001, pipVal:7,   type:"Forex",commRT:5, swapLval:2.00,   swapSval:-7.00,  note:"100,000 USD · ~$7/піп"},
-  USDCHF:{digits:5,pipSize:0.0001, pipVal:12,  type:"Forex",commRT:5, swapLval:7.00,   swapSval:-19.00, note:"100,000 USD · ~$12/піп"},
-  USDJPY:{digits:3,pipSize:0.01,   pipVal:6,   type:"Forex",commRT:5, swapLval:6.00,   swapSval:-11.00, note:"100,000 USD · ~$6/піп"},
-  XAUUSD:{digits:2,pipSize:0.01,   pipVal:1,   type:"CFD",  commRT:5, swapLval:-66.00, swapSval:34.00,  note:"100 oz · $1/pt"},
-  XAGUSD:{digits:3,pipSize:0.001,  pipVal:5,   type:"CFD",  commRT:5, swapLval:-195.00,swapSval:21.00,  note:"5,000 oz · $5/pt"},
-  WTI:   {digits:2,pipSize:0.01,   pipVal:10,  type:"CFD",  commRT:5, swapLval:-4.00,  swapSval:-140.00,note:"1,000 bbl · $10/pt"},
-  NGAS:  {digits:3,pipSize:0.001,  pipVal:30,  type:"CFD",  commRT:5, swapLval:-183.00,swapSval:-180.00,note:"30,000 MMBtu · $30/pt"},
-  SP500: {digits:1,pipSize:0.1,    pipVal:1,   type:"CFD",  commRT:5, swapLval:-1.00,  swapSval:0.00,   note:"×1 · $1/pt"},
+  EURUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, tickVal:1,    swapLval:-10.00, swapSval:2.00,   note:"100,000 EUR · $10/піп"},
+  GBPUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, tickVal:1,    swapLval:-4.00,  swapSval:-5.00,  note:"100,000 GBP · $10/піп"},
+  AUDUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, tickVal:1,    swapLval:-3.00,  swapSval:-5.00,  note:"100,000 AUD · $10/піп"},
+  NZDUSD:{digits:5,pipSize:0.0001, pipVal:10,  type:"Forex",commRT:5, tickVal:1,    swapLval:-5.00,  swapSval:0.00,   note:"100,000 NZD · $10/піп"},
+  USDCAD:{digits:5,pipSize:0.0001, pipVal:7,   type:"Forex",commRT:5, tickVal:1,    swapLval:2.00,   swapSval:-7.00,  note:"100,000 USD · ~$7/піп"},
+  USDCHF:{digits:5,pipSize:0.0001, pipVal:12,  type:"Forex",commRT:5, tickVal:1,    swapLval:7.00,   swapSval:-19.00, note:"100,000 USD · ~$12/піп"},
+  USDJPY:{digits:3,pipSize:0.01,   pipVal:6,   type:"Forex",commRT:5, tickVal:0.617,swapLval:6.00,   swapSval:-11.00, note:"100,000 USD · ~$6/піп"},
+  XAUUSD:{digits:2,pipSize:0.01,   pipVal:1,   type:"CFD",  commRT:5, tickVal:1,    swapLval:-66.00, swapSval:34.00,  note:"100 oz · $1/pt"},
+  XAGUSD:{digits:3,pipSize:0.001,  pipVal:5,   type:"CFD",  commRT:5, tickVal:5,    swapLval:-195.00,swapSval:21.00,  note:"5,000 oz · $5/pt"},
+  WTI:   {digits:2,pipSize:0.01,   pipVal:10,  type:"CFD",  commRT:5, tickVal:10,   swapLval:-4.00,  swapSval:-140.00,note:"1,000 bbl · $10/pt"},
+  NGAS:  {digits:3,pipSize:0.001,  pipVal:30,  type:"CFD",  commRT:5, tickVal:30,   swapLval:-183.00,swapSval:-180.00,note:"30,000 MMBtu · $30/pt"},
+  SP500: {digits:1,pipSize:0.1,    pipVal:1,   type:"CFD",  commRT:5, tickVal:0.1,  swapLval:-1.00,  swapSval:0.00,   note:"×1 · $1/pt"},
 };
-// Фіксовані коефіцієнти $ за 1 пункт від дефолтних констант
-  const DEFAULT_SWAP_USD = {};
-  Object.entries(SPECS).forEach(([sym, s]) => {
-    DEFAULT_SWAP_USD[sym] = { L: s.swapLval, S: s.swapSval };
-  });
-  const DEFAULT_SWAP_PTS = {};
-  Object.entries(SWAP_PTS).forEach(([sym, v]) => {
-    DEFAULT_SWAP_PTS[sym] = { L: v.L, S: v.S };
-  });
-  const PT_VAL = {};
-  Object.keys(SPECS).forEach(sym => {
-    PT_VAL[sym] = {
-      L: DEFAULT_SWAP_PTS[sym].L !== 0 ? DEFAULT_SWAP_USD[sym].L / DEFAULT_SWAP_PTS[sym].L : 0,
-      S: DEFAULT_SWAP_PTS[sym].S !== 0 ? DEFAULT_SWAP_USD[sym].S / DEFAULT_SWAP_PTS[sym].S : 0,
-    };
-  });
+
 
 const DEFS={
   EURUSD:{e:"1.13500",t:"1.15700",sl:50},GBPUSD:{e:"1.31400",t:"1.33500",sl:50},
@@ -379,9 +364,8 @@ onSym();
     const pts = parseFloat(ptsStr) || 0;
     const s = SPECS[sym];
     if (!s) return;
-    // Використовуємо фіксований коефіцієнт $ за 1 пункт
-    const ptVal = PT_VAL[sym] ? PT_VAL[sym][dir] : 0;
-    const newUSD = pts * ptVal;
+    // swap$ = pts × tickVal (contract_size × point_size)
+    const newUSD = pts * (s.tickVal || 1);
     // Оновлюємо SPECS
     if (dir === "L") { s.swapLval = newUSD; SWAP_PTS[sym].L = pts; }
     else             { s.swapSval = newUSD; SWAP_PTS[sym].S = pts; }
