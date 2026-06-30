@@ -251,6 +251,15 @@ const SPECS = {
   NGAS:  {digits:3,pipSize:0.001,  pipVal:30,  type:"CFD",  commRT:5, swapLval:-183.00,swapSval:-180.00,note:"30,000 MMBtu · $30/pt"},
   SP500: {digits:1,pipSize:0.1,    pipVal:1,   type:"CFD",  commRT:5, swapLval:-1.00,  swapSval:0.00,   note:"×1 · $1/pt"},
 };
+// Фіксовані коефіцієнти $ за 1 пункт (рахуються один раз від дефолтних значень)
+  const PT_VAL = {};
+  Object.entries(SPECS).forEach(([sym, s]) => {
+    PT_VAL[sym] = {
+      L: SWAP_PTS[sym].L !== 0 ? s.swapLval / SWAP_PTS[sym].L : 0,
+      S: SWAP_PTS[sym].S !== 0 ? s.swapSval / SWAP_PTS[sym].S : 0,
+    };
+  });
+
 const DEFS={
   EURUSD:{e:"1.13500",t:"1.15700",sl:50},GBPUSD:{e:"1.31400",t:"1.33500",sl:50},
   AUDUSD:{e:"0.69425",t:"0.71570",sl:50},NZDUSD:{e:"0.56700",t:"0.58500",sl:50},
@@ -362,21 +371,14 @@ onSym();
     const pts = parseFloat(ptsStr) || 0;
     const s = SPECS[sym];
     if (!s) return;
-    // ptVal: скільки $ дає 1 пункт для цього інструменту
-    const basePts = dir === "L" ? SWAP_PTS[sym].L : SWAP_PTS[sym].S;
-    const baseUSD = dir === "L" ? s.swapLval : s.swapSval;
-    const ptVal = basePts !== 0 ? baseUSD / basePts : 0;
+    // Використовуємо фіксований коефіцієнт $ за 1 пункт
+    const ptVal = PT_VAL[sym] ? PT_VAL[sym][dir] : 0;
     const newUSD = pts * ptVal;
     // Оновлюємо SPECS
     if (dir === "L") { s.swapLval = newUSD; SWAP_PTS[sym].L = pts; }
     else             { s.swapSval = newUSD; SWAP_PTS[sym].S = pts; }
-    // Зберігаємо USD значення в localStorage
-    try {
-      const usdData = {};
-      Object.entries(SPECS).forEach(([k,v]) => { usdData[k] = {L: v.swapLval, S: v.swapSval}; });
-      localStorage.setItem("swapUSD", JSON.stringify(usdData));
-      localStorage.setItem("swapPts", JSON.stringify(SWAP_PTS));
-    } catch(e) {}
+    // Зберігаємо пункти в localStorage
+    try { localStorage.setItem("swapPts", JSON.stringify(SWAP_PTS)); } catch(e) {}
     // Оновлюємо відображення $
     const el = document.getElementById(`swap-usd-${sym}-${dir}`);
     if (el) {
@@ -528,27 +530,20 @@ onSym();
   const _origCalc = calc;
   calc = function(){ _origCalc(); syncToCosts(); };
   renderSwapTable();
-  // Завантажуємо збережені свопи з localStorage
+  // Завантажуємо збережені пункти свопів з localStorage
   try {
-    const savedUSD = localStorage.getItem("swapUSD");
     const savedPts = localStorage.getItem("swapPts");
-    if (savedUSD && savedPts) {
-      const usd = JSON.parse(savedUSD);
+    if (savedPts) {
       const pts = JSON.parse(savedPts);
-      Object.entries(usd).forEach(([sym, vals]) => {
-        if (!SPECS[sym]) return;
-        SPECS[sym].swapLval = vals.L;
-        SPECS[sym].swapSval = vals.S;
-        if (pts[sym]) { SWAP_PTS[sym].L = pts[sym].L; SWAP_PTS[sym].S = pts[sym].S; }
-        // Оновлюємо UI таблиці
-        const elL = document.getElementById(`swap-usd-${sym}-L`);
-        const elS = document.getElementById(`swap-usd-${sym}-S`);
-        if (elL) { elL.textContent = (vals.L >= 0 ? "+$" : "-$") + Math.abs(Math.round(vals.L)); elL.style.color = vals.L >= 0 ? "#3fb950" : "#f85149"; }
-        if (elS) { elS.textContent = (vals.S >= 0 ? "+$" : "-$") + Math.abs(Math.round(vals.S)); elS.style.color = vals.S >= 0 ? "#3fb950" : "#f85149"; }
-        const inL = document.querySelector(`input[oninput*="'${sym}','L'"]`);
-        const inS = document.querySelector(`input[oninput*="'${sym}','S'"]`);
-        if (inL && pts[sym]) inL.value = pts[sym].L;
-        if (inS && pts[sym]) inS.value = pts[sym].S;
+      Object.entries(pts).forEach(([sym, vals]) => {
+        if (!SWAP_PTS[sym]) return;
+        ["L","S"].forEach(dir => {
+          const v = vals[dir];
+          if (v === undefined) return;
+          onSwapPtsChange(sym, dir, v);
+          const inp = document.querySelector(`input[oninput*="'${sym}','${dir}'"]`);
+          if (inp) inp.value = v;
+        });
       });
     }
   } catch(e) {}
