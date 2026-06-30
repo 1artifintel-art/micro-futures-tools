@@ -30,15 +30,15 @@ NZDUSD:{digits:5, pipSize:0.0001, pipVal:10,  commRT:5, swapLval:-5.00,  swapSva
 USDCAD:{digits:5, pipSize:0.0001, pipVal:7,   commRT:5, swapLval:2.00,   swapSval:-7.00}
 USDCHF:{digits:5, pipSize:0.0001, pipVal:12,  commRT:5, swapLval:7.00,   swapSval:-19.00}
 USDJPY:{digits:3, pipSize:0.01,   pipVal:6,   commRT:5, swapLval:6.00,   swapSval:-11.00}
-XAUUSD:{digits:2, pipSize:0.01,   pipVal:1,   commRT:7, swapLval:-66.00, swapSval:34.00}
-XAGUSD:{digits:3, pipSize:0.001,  pipVal:5,   commRT:7, swapLval:-195.00,swapSval:21.00}
+XAUUSD:{digits:2, pipSize:0.01,   pipVal:1,   commRT:5, swapLval:-66.00, swapSval:34.00}
+XAGUSD:{digits:3, pipSize:0.001,  pipVal:5,   commRT:5, swapLval:-195.00,swapSval:21.00}
 WTI:   {digits:2, pipSize:0.01,   pipVal:10,  commRT:5, swapLval:-4.00,  swapSval:-140.00}
 NGAS:  {digits:3, pipSize:0.001,  pipVal:30,  commRT:5, swapLval:-183.00,swapSval:-180.00}
 SP500: {digits:1, pipSize:0.1,    pipVal:1,   commRT:5, swapLval:-1.00,  swapSval:0.00}
 ```
 
 - `pipVal` — $ за 1 піп на 1 лот (з калькулятора AMarkets ECN)
-- `commRT` — комісія round-turn $/лот ($5 всі, $7 для XAU/XAG)
+- `commRT` — комісія round-turn $/лот ($5 для всіх інструментів)
 - `swapLval/swapSval` — $/лот/ніч (з калькулятора AMarkets ECN, 27.06.2026)
 
 ---
