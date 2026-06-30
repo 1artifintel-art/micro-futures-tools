@@ -532,6 +532,7 @@ onSym();
   renderSwapTable();
   // Завантажуємо збережені пункти свопів з localStorage
   try {
+    localStorage.removeItem("swapUSD"); // чистимо старий ключ
     const savedPts = localStorage.getItem("swapPts");
     if (savedPts) {
       const pts = JSON.parse(savedPts);
