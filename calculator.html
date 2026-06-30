@@ -218,7 +218,7 @@ optgroup { color: #7d8590; font-size: 11px; }
           </thead>
           <tbody id="cc-swap-table"></tbody>
         </table>
-        <div style="font-size:9px;color:#484f58;margin-top:4px">30.06.2026 · AMarkets ECN</div>
+        <div style="font-size:9px;color:#484f58;margin-top:4px">27.06.2026 · AMarkets ECN</div>
       </div>
 
     </div>
@@ -478,11 +478,7 @@ onSym();
     document.getElementById("cc-total").textContent         = (totalCostSigned>=0?"+$":"-$") + Math.abs(totalCostSigned).toFixed(2);
     document.getElementById("cc-total").style.color         = totalCostSigned>=0 ? "#3fb950" : "#f85149";
     updateBreakevenWithSpread();
-    document.getElementById("cc-breakeven").textContent     = beP>0 ? `${bePwithSpread.toFixed(1)} піп · $${Math.abs(totalCostSigned).toFixed(2)}` : "—";
-    const beSub = spreadPips>0
-      ? `спред ${spreadPips.toFixed(1)} + комісія/своп ${beP.toFixed(1)} піп`
-      : `піп · $ щоб покрити комісію та своп`;
-    document.getElementById("cc-breakeven-sub").textContent = beSub;
+    // cc-breakeven і cc-breakeven-sub не існують в HTML — прибрано
   }
 
   function updateBreakevenWithSpread() {
