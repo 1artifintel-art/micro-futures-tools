@@ -370,8 +370,13 @@ onSym();
     // Оновлюємо SPECS
     if (dir === "L") { s.swapLval = newUSD; SWAP_PTS[sym].L = pts; }
     else             { s.swapSval = newUSD; SWAP_PTS[sym].S = pts; }
-    // Зберігаємо в localStorage
-    try { localStorage.setItem("swapPts", JSON.stringify(SWAP_PTS)); } catch(e) {}
+    // Зберігаємо USD значення в localStorage
+    try {
+      const usdData = {};
+      Object.entries(SPECS).forEach(([k,v]) => { usdData[k] = {L: v.swapLval, S: v.swapSval}; });
+      localStorage.setItem("swapUSD", JSON.stringify(usdData));
+      localStorage.setItem("swapPts", JSON.stringify(SWAP_PTS));
+    } catch(e) {}
     // Оновлюємо відображення $
     const el = document.getElementById(`swap-usd-${sym}-${dir}`);
     if (el) {
@@ -525,21 +530,25 @@ onSym();
   renderSwapTable();
   // Завантажуємо збережені свопи з localStorage
   try {
-    const saved = localStorage.getItem("swapPts");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      Object.entries(parsed).forEach(([sym, vals]) => {
-        if (!SWAP_PTS[sym]) return;
-        ["L","S"].forEach(dir => {
-          const pts = dir === "L" ? vals.L : vals.S;
-          if (pts !== undefined) onSwapPtsChange(sym, dir, pts);
-        });
-      });
-      Object.entries(parsed).forEach(([sym, vals]) => {
+    const savedUSD = localStorage.getItem("swapUSD");
+    const savedPts = localStorage.getItem("swapPts");
+    if (savedUSD && savedPts) {
+      const usd = JSON.parse(savedUSD);
+      const pts = JSON.parse(savedPts);
+      Object.entries(usd).forEach(([sym, vals]) => {
+        if (!SPECS[sym]) return;
+        SPECS[sym].swapLval = vals.L;
+        SPECS[sym].swapSval = vals.S;
+        if (pts[sym]) { SWAP_PTS[sym].L = pts[sym].L; SWAP_PTS[sym].S = pts[sym].S; }
+        // Оновлюємо UI таблиці
+        const elL = document.getElementById(`swap-usd-${sym}-L`);
+        const elS = document.getElementById(`swap-usd-${sym}-S`);
+        if (elL) { elL.textContent = (vals.L >= 0 ? "+$" : "-$") + Math.abs(Math.round(vals.L)); elL.style.color = vals.L >= 0 ? "#3fb950" : "#f85149"; }
+        if (elS) { elS.textContent = (vals.S >= 0 ? "+$" : "-$") + Math.abs(Math.round(vals.S)); elS.style.color = vals.S >= 0 ? "#3fb950" : "#f85149"; }
         const inL = document.querySelector(`input[oninput*="'${sym}','L'"]`);
         const inS = document.querySelector(`input[oninput*="'${sym}','S'"]`);
-        if (inL && vals.L !== undefined) inL.value = vals.L;
-        if (inS && vals.S !== undefined) inS.value = vals.S;
+        if (inL && pts[sym]) inL.value = pts[sym].L;
+        if (inS && pts[sym]) inS.value = pts[sym].S;
       });
     }
   } catch(e) {}
