@@ -370,6 +370,8 @@ onSym();
     // Оновлюємо SPECS
     if (dir === "L") { s.swapLval = newUSD; SWAP_PTS[sym].L = pts; }
     else             { s.swapSval = newUSD; SWAP_PTS[sym].S = pts; }
+    // Зберігаємо в localStorage
+    try { localStorage.setItem("swapPts", JSON.stringify(SWAP_PTS)); } catch(e) {}
     // Оновлюємо відображення $
     const el = document.getElementById(`swap-usd-${sym}-${dir}`);
     if (el) {
@@ -521,6 +523,26 @@ onSym();
   const _origCalc = calc;
   calc = function(){ _origCalc(); syncToCosts(); };
   renderSwapTable();
+  // Завантажуємо збережені свопи з localStorage
+  try {
+    const saved = localStorage.getItem("swapPts");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.entries(parsed).forEach(([sym, vals]) => {
+        if (!SWAP_PTS[sym]) return;
+        ["L","S"].forEach(dir => {
+          const pts = dir === "L" ? vals.L : vals.S;
+          if (pts !== undefined) onSwapPtsChange(sym, dir, pts);
+        });
+      });
+      Object.entries(parsed).forEach(([sym, vals]) => {
+        const inL = document.querySelector(`input[oninput*="'${sym}','L'"]`);
+        const inS = document.querySelector(`input[oninput*="'${sym}','S'"]`);
+        if (inL && vals.L !== undefined) inL.value = vals.L;
+        if (inS && vals.S !== undefined) inS.value = vals.S;
+      });
+    }
+  } catch(e) {}
   syncToCosts();
 </script>
 </body>
