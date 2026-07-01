@@ -27,6 +27,7 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; color: #e6edf3; }
 .metric.green .vl { color: #3fb950; }
 .metric.red .vl { color: #f85149; }
 .metric.blue .vl { color: #388bfd; }
+.metric.orange .vl { color: #f0883e; }
 .warn { font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-top: 12px; display: none; }
 .warn.danger { background: rgba(248,81,73,.12); color: #f85149; border: 1px solid rgba(248,81,73,.3); }
 .warn.caution { background: rgba(210,153,34,.12); color: #d2a520; border: 1px solid rgba(210,153,34,.3); }
@@ -90,6 +91,7 @@ optgroup { color: #7d8590; font-size: 11px; }
         </select>
       </div>
       <div class="field"><label>Баланс рахунку ($)</label><input type="number" id="bal" value="5000" min="1" oninput="calc()"></div>
+      <div class="field"><label>Кредитне плече</label><input type="number" id="leverage" value="200" min="1" oninput="calc()"></div>
     </div>
   </div>
 
@@ -102,6 +104,7 @@ optgroup { color: #7d8590; font-size: 11px; }
       <div class="metric blue"> <div class="lb">R:R</div><div class="vl" id="r-rr">—</div><div class="sb">профіт / збиток</div></div>
       <div class="metric">      <div class="lb">Ціна стоп-лосу</div><div class="vl" id="r-sl">—</div><div class="sb" id="r-sl-sub"></div></div>
       <div class="metric">      <div class="lb">Ризик від балансу</div><div class="vl" id="r-pct">—</div><div class="sb">рекомендовано ≤2%</div></div>
+      <div class="metric orange"><div class="lb">Маржа (для розрах. лотів)</div><div class="vl" id="r-margin">—</div><div class="sb" id="r-margin-sub"></div></div>
     </div>
     <div class="warn danger" id="w1">⚠️ Ризик перевищує 5% балансу — дуже небезпечно</div>
     <div class="warn caution" id="w2">⚠️ Ризик перевищує 2% балансу</div>
@@ -307,6 +310,19 @@ function calc(){
   document.getElementById("r-pct").textContent=pct+"%";
   document.getElementById("w1").style.display=parseFloat(pct)>5?"block":"none";
   document.getElementById("w2").style.display=(parseFloat(pct)>2&&parseFloat(pct)<=5)?"block":"none";
+
+  // Маржа = Lots × ContractSize / Leverage
+  const lev = parseFloat(document.getElementById("leverage").value) || 200;
+  const contractSize = s.contract_size || 100000;
+  const margin = Math.round(lotsR * contractSize / lev);
+  const marginPct = bal > 0 ? (margin / bal * 100).toFixed(1) : "—";
+  const rMargin = document.getElementById("r-margin");
+  const rMarginSub = document.getElementById("r-margin-sub");
+  if (rMargin) {
+    rMargin.textContent = margin > 0 ? "$" + margin : "—";
+    rMarginSub.textContent = lotsR.toFixed(2) + " × " + contractSize.toLocaleString() + " / " + lev + " = " + marginPct + "% балансу";
+    rMargin.parentElement.style.borderColor = margin > bal * 0.8 ? "#f85149" : "#21262d";
+  }
 }
 onSym();
 
